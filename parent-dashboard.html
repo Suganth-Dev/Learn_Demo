@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MTS Connect - Parent Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Time slot selection styles in Modal */
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .slot-btn {
+      background-color: var(--bg-light);
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .slot-btn:hover {
+      border-color: var(--accent-cyan);
+      background-color: var(--accent-cyan-light);
+      color: var(--primary-navy);
+    }
+    .slot-btn.booked {
+      background-color: #F3F4F6;
+      color: #9CA3AF;
+      cursor: not-allowed;
+      text-decoration: line-through;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container" style="display: block;">
+    <!-- Shared Sidebar (Parent View) -->
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-brand">
+          <div class="sidebar-logo">த</div>
+          <div class="brand-text">MTS <span>Connect</span></div>
+        </div>
+        <ul class="sidebar-menu">
+          <li class="sidebar-item active">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="home"></i>
+              <span class="lang-en">Home</span>
+              <span class="lang-ta">முகப்பு</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="users"></i>
+              <span class="lang-en">My Children</span>
+              <span class="lang-ta">எனது குழந்தைகள்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="calendar-check"></i>
+              <span class="lang-en">Attendance</span>
+              <span class="lang-ta">வருகைப்பதிவு</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="book-open"></i>
+              <span class="lang-en">Homework</span>
+              <span class="lang-ta">வீட்டுப்பாடம்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="megaphone"></i>
+              <span class="lang-en">Announcements</span>
+              <span class="lang-ta">அறிவிப்புகள்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="calendar"></i>
+              <span class="lang-en">Calendar</span>
+              <span class="lang-ta">நாட்காட்டி</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="message-square"></i>
+              <span class="lang-en">Messages</span>
+              <span class="lang-ta">செய்திகள்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="clipboard-list"></i>
+              <span class="lang-en">Forms & Checklist</span>
+              <span class="lang-ta">படிவங்கள்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="user"></i>
+              <span class="lang-en">Account</span>
+              <span class="lang-ta">கணக்கு</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- User Info Card bottom of sidebar -->
+      <div class="sidebar-user">
+        <div class="user-card">
+          <div class="user-avatar">PK</div>
+          <div class="user-info">
+            <div class="user-name">Priya Kumar</div>
+            <div class="user-role-badge">Parent</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Panel -->
+    <main class="main-content">
+      <!-- Navbar (shared) -->
+      <nav class="navbar">
+        <div class="navbar-left">
+          <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="navbar-title">
+            <span class="lang-en">Dashboard Console</span>
+            <span class="lang-ta">கட்டுப்பாட்டு பலகை</span>
+          </div>
+        </div>
+
+        <div class="navbar-right">
+          <!-- Notification Bell -->
+          <button class="nav-icon-btn" id="notification-bell-btn">
+            <i data-lucide="bell"></i>
+            <span class="badge-count">3</span>
+          </button>
+
+          <!-- Language toggle -->
+          <button class="lang-btn">
+            <i data-lucide="globe"></i>
+            <span class="lang-btn-text">தமிழ்</span>
+          </button>
+
+          <!-- Avatar Menu -->
+          <div class="profile-menu">
+            <button class="profile-trigger">
+              <div class="profile-avatar">PK</div>
+              <i data-lucide="chevron-down" style="width: 16px; height: 16px; color: var(--text-secondary);"></i>
+            </button>
+            <div class="profile-dropdown">
+              <a href="#" class="dropdown-item" onclick="document.querySelector('[data-lucide=user]').parentElement.click()">
+                <i data-lucide="user" style="width:16px; height:16px;"></i> Profile
+              </a>
+              <a href="#" class="dropdown-item" onclick="document.querySelector('[data-lucide=user]').parentElement.click()">
+                <i data-lucide="settings" style="width:16px; height:16px;"></i> Settings
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="index.html" class="dropdown-item">
+                <i data-lucide="log-out" style="width:16px; height:16px;"></i> Sign Out
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Dashboard Pages Area -->
+      <div class="page-container">
+        
+        <!-- Active Child Selector Banner -->
+        <div class="child-switcher-banner">
+          <div class="child-info">
+            <i data-lucide="smile" style="color:var(--accent-cyan)"></i>
+            <span id="active-child-details-banner">
+              Viewing: <strong>Anika Kumar</strong> | Grade 3 | Class 3-A | Teacher: Mrs. Lakshmi R.
+            </span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <label class="form-label" style="font-size:12px; margin:0;" for="child-selector-dropdown">
+              <span class="lang-en">Switch Student:</span>
+              <span class="lang-ta">மாணவரை மாற்றுக:</span>
+            </label>
+            <select class="child-select-dropdown" id="child-selector-dropdown">
+              <option value="Anika Kumar">Anika Kumar</option>
+              <option value="Rohan Kumar">Rohan Kumar</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 1: Home Dashboard -------------------- -->
+        <div class="content-panel active" id="panel-home">
+          <!-- Row 1: Status Cards (3 columns) -->
+          <div class="grid-3">
+            <!-- Card 1: School Status -->
+            <div class="card status-card-green">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <i data-lucide="activity" style="color: var(--success-green);"></i>
+                  <span class="lang-en">Today's School Status</span>
+                  <span class="lang-ta">இன்றைய பள்ளி நிலை</span>
+                </div>
+              </div>
+              <div class="card-content">
+                <span class="badge badge-green big-status-title green" id="school-status-badge">
+                  ✅ CLASS ON
+                </span>
+                <div>
+                  <p style="font-weight: 600; font-size:14.5px;" id="school-status-venue">Venue: MTS Building A</p>
+                  <p style="font-size:13.5px; color:var(--text-secondary);" id="school-status-parking">Parking: Main Lot Open</p>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="alert('School Details: Classes are running as scheduled on Marietta campus building A.')">
+                  <span class="lang-en">View Details</span>
+                  <span class="lang-ta">விவரங்களை காண்க</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Card 2: Next Class -->
+            <div class="card">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <i data-lucide="calendar"></i>
+                  <span class="lang-en">Next Class</span>
+                  <span class="lang-ta">அடுத்த வகுப்பு</span>
+                </div>
+              </div>
+              <div class="card-content">
+                <div style="display: flex; align-items: center; gap: 12px; margin: 6px 0;">
+                  <div style="font-size: 32px;">📅</div>
+                  <div>
+                    <h4 style="font-weight: 700; color:var(--primary-navy);">Friday, Jun 13, 2025</h4>
+                    <p style="font-size: 13px; color: var(--text-secondary);">6:30 PM (EST)</p>
+                  </div>
+                </div>
+                <p style="font-size: 13.5px;">MTS Building A, 123 School Dr, Marietta GA</p>
+                <span class="badge badge-blue" style="font-size:11px;">Scheduled Session</span>
+                <button class="btn btn-secondary btn-sm" onclick="alert('Adding class session schedule to your primary calendar...')">
+                  <span class="lang-en">Add to Calendar</span>
+                  <span class="lang-ta">நாட்காட்டியில் சேர்க்கவும்</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Card 3: Attendance Summary -->
+            <div class="card">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <i data-lucide="calendar-check"></i>
+                  <span class="attendance-child-summary">Attendance Summary</span>
+                </div>
+              </div>
+              <div class="card-content">
+                <div class="donut-chart-box">
+                  <div class="donut-chart-css"></div>
+                  <div class="donut-stats">
+                    <div>Present: <strong id="attendance-present">17</strong></div>
+                    <div>Absent: <strong id="attendance-absent">3</strong></div>
+                    <div>Late: <strong id="attendance-late">1</strong></div>
+                  </div>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="document.querySelector('[data-lucide=calendar-check]').parentElement.click()">
+                  <span class="lang-en">Report Absence &rarr;</span>
+                  <span class="lang-ta">விடைபெற கோரவும் &rarr;</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2: Homework + Announcements (2+1 columns) -->
+          <div class="grid-2-1">
+            <!-- Card: Homework Status -->
+            <div class="card">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <i data-lucide="book-open"></i>
+                  <span class="homework-child-title">Homework Assignments</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="document.querySelector('[data-lucide=book-open]').parentElement.click()">
+                  <span class="lang-en">View All Homework</span>
+                  <span class="lang-ta">அனைத்து வீட்டுப்பாடங்கள்</span>
+                </button>
+              </div>
+              
+              <div class="card-content">
+                <div class="hw-stats-row">
+                  <div class="hw-stat-tile tile-amber">
+                    <span id="hw-due-count">2</span>
+                    Due
+                  </div>
+                  <div class="hw-stat-tile tile-blue">
+                    <span id="hw-submitted-count">5</span>
+                    Submitted
+                  </div>
+                  <div class="hw-stat-tile tile-green">
+                    <span id="hw-approved-count">12</span>
+                    Approved
+                  </div>
+                </div>
+
+                <div class="table-container">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Assignment</th>
+                        <th>Class</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="homework-table-body">
+                      <!-- Dynamically rendered -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card: Announcements Preview -->
+            <div class="card">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <i data-lucide="megaphone"></i>
+                  <span>Latest Announcement</span>
+                </div>
+              </div>
+              <div class="card-content" id="parent-home-announcement-box">
+                <!-- Dynamically populated announcement -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 2: My Children Directory -------------------- -->
+        <div class="content-panel" id="panel-children">
+          <div class="card">
+            <div class="card-title-group">
+              <div class="card-title">
+                <i data-lucide="users"></i>
+                <span>Registered Children Directory Profiles</span>
+              </div>
+            </div>
+            <div class="card-content" style="gap:20px;">
+              <div class="grid-2" id="parent-children-cards-list">
+                <!-- Seeding dynamic children profile cards -->
+              </div>
+
+              <!-- Corrections Form -->
+              <div style="background-color: var(--bg-light); border: 1px solid var(--border-color); border-radius:10px; padding:20px;">
+                <h4 style="font-weight:700; color:var(--primary-navy); margin-bottom:12px;">Request Profile Detail Corrections</h4>
+                <form onsubmit="event.preventDefault(); alert('Details change request has been submitted to Marietta campus admin office for review.');" style="display:flex; flex-direction:column; gap:12px;">
+                  <div class="form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div class="form-group">
+                      <label class="form-label">Child Profile</label>
+                      <select class="form-input">
+                        <option>Anika Kumar</option>
+                        <option>Rohan Kumar</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Field to Correct</label>
+                      <input type="text" class="form-input" placeholder="e.g. Spelling, Date of Birth, Emergency Contact">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Corrected Information & Details</label>
+                    <textarea class="form-input" rows="2" placeholder="Describe the corrections needed..."></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-sm" style="width:fit-content; align-self:flex-end;">Submit Request</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 3: Attendance Details -------------------- -->
+        <div class="content-panel" id="panel-attendance">
+          <div class="grid-2-1">
+            <div class="card">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <i data-lucide="calendar-check"></i>
+                  <span>Class Session Attendance Log</span>
+                </div>
+              </div>
+              <div class="card-content">
+                <div class="table-container">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Session Date</th>
+                        <th>Session Description</th>
+                        <th>Mark Status</th>
+                        <th>Instructor Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody id="parent-attendance-log-tbody">
+                      <!-- Dynamically seeded -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Report Absence form -->
+            <div class="card">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <i data-lucide="alert-triangle"></i>
+                  <span>Report Planned Absence</span>
+                </div>
+              </div>
+              <form onsubmit="handleAbsenceReportSubmit(event)" style="display:flex; flex-direction:column; gap:12px;">
+                <div class="form-group">
+                  <label class="form-label" for="absence-date">Absence Date</label>
+                  <input type="date" class="form-input" id="absence-date" required value="2025-06-13">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="absence-reason">Reason Category</label>
+                  <select class="form-input" id="absence-reason">
+                    <option>Doctor appointment</option>
+                    <option>Sick leave</option>
+                    <option>Family trip</option>
+                    <option>Other / Excused</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="absence-notes">Parent Explanatory Notes</label>
+                  <textarea class="form-input" id="absence-notes" rows="3" required placeholder="Provide reasons for absence..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger btn-sm">Submit Absence Notice</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 4: Homework Center -------------------- -->
+        <div class="content-panel" id="panel-homework">
+          <div class="grid-2-1">
+            <div class="card">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <i data-lucide="book-open"></i>
+                  <span>Academic Homework Submissions</span>
+                </div>
+              </div>
+              <div class="card-content">
+                <div class="table-container">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Assignment</th>
+                        <th>Target Class</th>
+                        <th>Due Date</th>
+                        <th>Evaluation Status</th>
+                        <th>Teacher Comments</th>
+                      </tr>
+                    </thead>
+                    <tbody id="parent-homework-center-tbody">
+                      <!-- Seeded dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Homework submission form -->
+            <div class="card">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <i data-lucide="upload-cloud"></i>
+                  <span>Submit Assignment</span>
+                </div>
+              </div>
+              <form onsubmit="handleParentSubmitHomework(event)" style="display:flex; flex-direction:column; gap:12px;">
+                <div class="form-group">
+                  <label class="form-label" for="submit-hw-id">Select Homework Assignment</label>
+                  <select class="form-input" id="submit-hw-id">
+                    <!-- Loaded dynamically -->
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="submit-hw-file">Upload Attachment (Simulate filename)</label>
+                  <select class="form-input" id="submit-hw-file">
+                    <option value="anika_alphabets_june.jpg">anika_alphabets_june.jpg (Image - 1.2MB)</option>
+                    <option value="rohan_recitation_ch1.mp3">rohan_recitation_ch1.mp3 (Audio - 3.4MB)</option>
+                    <option value="family_tamil_sentences.pdf">family_tamil_sentences.pdf (Document - 800KB)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="submit-hw-comment">Comments for Teacher</label>
+                  <textarea class="form-input" id="submit-hw-comment" rows="2" placeholder="Write optional comments..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Upload & Submit Homework</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 5: Announcements Archive -------------------- -->
+        <div class="content-panel" id="panel-announcements">
+          <div class="card">
+            <div class="card-title-group">
+              <div class="card-title">
+                <i data-lucide="megaphone"></i>
+                <span>School Announcements Broadcast Logs</span>
+              </div>
+            </div>
+            <div class="card-content" id="parent-announcements-list">
+              <!-- Dynamically rendered announcements cards -->
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 6: Calendar and Events -------------------- -->
+        <div class="content-panel" id="panel-calendar">
+          <div class="grid-2-1">
+            <!-- The Calendar Month View -->
+            <div class="card" style="padding: 24px;">
+              <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);">
+                <div class="legend-item"><span class="badge badge-blue" style="width:12px; height:12px; border-radius:50%; padding:0;"></span> Class Day</div>
+                <div class="legend-item"><span class="badge badge-amber" style="width:12px; height:12px; border-radius:50%; padding:0;"></span> Special Event</div>
+                <div class="legend-item"><span class="badge badge-green" style="width:12px; height:12px; border-radius:50%; padding:0;"></span> Holiday</div>
+                <div class="legend-item"><span class="badge badge-red" style="width:12px; height:12px; border-radius:50%; padding:0;"></span> Closed</div>
+              </div>
+
+              <!-- Calendar Month Grid (Static June 2025 layout) -->
+              <div class="calendar-grid">
+                <div class="calendar-header-day">Sun</div>
+                <div class="calendar-header-day">Mon</div>
+                <div class="calendar-header-day">Tue</div>
+                <div class="calendar-header-day">Wed</div>
+                <div class="calendar-header-day">Thu</div>
+                <div class="calendar-header-day">Fri</div>
+                <div class="calendar-header-day">Sat</div>
+
+                <!-- Days -->
+                <div class="calendar-cell"><span class="cell-num">1</span></div>
+                <div class="calendar-cell"><span class="cell-num">2</span></div>
+                <div class="calendar-cell"><span class="cell-num">3</span></div>
+                <div class="calendar-cell"><span class="cell-num">4</span></div>
+                <div class="calendar-cell"><span class="cell-num">5</span></div>
+                <div class="calendar-cell"><span class="cell-num">6</span><div class="cell-events"><span class="calendar-badge cal-badge-blue">Class Day</span></div></div>
+                <div class="calendar-cell"><span class="cell-num">7</span></div>
+                <div class="calendar-cell"><span class="cell-num">8</span></div>
+                <div class="calendar-cell"><span class="cell-num">9</span></div>
+                <div class="calendar-cell"><span class="cell-num">10</span></div>
+                <div class="calendar-cell"><span class="cell-num">11</span></div>
+                <div class="calendar-cell"><span class="cell-num">12</span></div>
+                <div class="calendar-cell today"><span class="cell-num">13</span><div class="cell-events"><span class="calendar-badge cal-badge-blue">Class Day</span><span class="calendar-badge cal-badge-yellow">Practice</span></div></div>
+                <div class="calendar-cell"><span class="cell-num">14</span><div class="cell-events"><span class="calendar-badge cal-badge-yellow">Annual Day</span></div></div>
+                <div class="calendar-cell"><span class="cell-num">15</span></div>
+                <div class="calendar-cell"><span class="cell-num">16</span></div>
+                <div class="calendar-cell"><span class="cell-num">17</span></div>
+                <div class="calendar-cell"><span class="cell-num">18</span></div>
+                <div class="calendar-cell"><span class="cell-num">19</span></div>
+                <div class="calendar-cell"><span class="cell-num">20</span><div class="cell-events"><span class="calendar-badge cal-badge-blue">Class Day</span></div></div>
+                <div class="calendar-cell"><span class="cell-num">21</span><div class="cell-events"><span class="calendar-badge cal-badge-yellow" style="background-color: #FEF3C7; color: #D97706;">PT Meeting</span></div></div>
+                <div class="calendar-cell"><span class="cell-num">22</span></div>
+                <div class="calendar-cell"><span class="cell-num">23</span></div>
+                <div class="calendar-cell"><span class="cell-num">24</span></div>
+                <div class="calendar-cell"><span class="cell-num">25</span></div>
+                <div class="calendar-cell"><span class="cell-num">26</span></div>
+                <div class="calendar-cell"><span class="cell-num">27</span><div class="cell-events"><span class="calendar-badge cal-badge-blue">Class Day</span></div></div>
+                <div class="calendar-cell"><span class="cell-num">28</span><div class="cell-events"><span class="calendar-badge cal-badge-yellow">Cultural Quiz</span></div></div>
+                <div class="calendar-cell"><span class="cell-num">29</span></div>
+                <div class="calendar-cell"><span class="cell-num">30</span></div>
+                <div class="calendar-cell inactive"><span class="cell-num">1</span></div>
+                <div class="calendar-cell inactive"><span class="cell-num">2</span></div>
+                <div class="calendar-cell inactive"><span class="cell-num">3</span></div>
+                <div class="calendar-cell inactive" style="background-color: var(--critical-red-light);"><span class="cell-num" style="color:var(--critical-red);">4</span><div class="cell-events"><span class="calendar-badge cal-badge-red">Closed</span></div></div>
+                <div class="calendar-cell inactive"><span class="cell-num">5</span></div>
+              </div>
+            </div>
+
+            <!-- Events RSVPs & Meeting Booking timeline -->
+            <div style="display:flex; flex-direction:column; gap:24px;">
+              <!-- RSVPs Card list -->
+              <div class="card">
+                <div class="card-title-group">
+                  <div class="card-title">
+                    <i data-lucide="bookmark"></i>
+                    <span>Upcoming Events & RSVPs</span>
+                  </div>
+                </div>
+                <div class="card-content" id="parent-events-rsvps" style="gap:16px;">
+                  <!-- Dynamically generated event cards -->
+                </div>
+              </div>
+
+              <!-- PT Meeting Slots card -->
+              <div class="card">
+                <div class="card-title-group">
+                  <div class="card-title">
+                    <i data-lucide="clock"></i>
+                    <span>Parent-Teacher Meeting</span>
+                  </div>
+                </div>
+                <div class="card-content">
+                  <p style="font-size:13px; color:var(--text-secondary);">Friday June 21 Parent-Teacher Conferences slot scheduling.</p>
+                  <div style="background-color: var(--bg-light); border-radius:8px; padding:12px; margin:8px 0; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:13px; font-weight:600;">Status: <strong id="booked-slot-text" style="color:var(--critical-red);">Not Booked</strong></span>
+                    <button class="btn btn-primary btn-sm" id="book-slot-trigger-btn" onclick="openModal('pt-slot-modal')">Book Slot</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 7: Messages Roster Chat -------------------- -->
+        <div class="content-panel" id="panel-messages">
+          <div class="chat-container">
+            <!-- Threads List -->
+            <div class="chat-threads">
+              <div class="chat-search-box">
+                <div class="search-input-wrapper">
+                  <i data-lucide="search" style="width:16px; height:16px;"></i>
+                  <input type="text" class="chat-search-input" placeholder="Search conversations...">
+                </div>
+              </div>
+              
+              <div class="threads-list">
+                <!-- Thread 1: Lakshmi R -->
+                <div class="thread-item active" onclick="switchActiveChatThread(1, 'Mrs. Lakshmi Rajendran', 'Grade 3-A Teacher', 'LR')">
+                  <div class="user-avatar" style="background-color: var(--accent-cyan);">LR</div>
+                  <div class="thread-details">
+                    <div class="thread-top">
+                      <span class="thread-name">Mrs. Lakshmi R.</span>
+                      <span class="thread-time">Just now</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span class="thread-preview unread">Check basic letter writing practice assignments...</span>
+                      <span class="unread-dot" id="unread-dot-1"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Thread 2: School Admin -->
+                <div class="thread-item" onclick="switchActiveChatThread(2, 'School Admin Office', 'Super Admin Office', 'SA')">
+                  <div class="user-avatar" style="background-color: var(--primary-navy);">SA</div>
+                  <div class="thread-details">
+                    <div class="thread-top">
+                      <span class="thread-name">School Admin</span>
+                      <span class="thread-time">Yesterday</span>
+                    </div>
+                    <span class="thread-preview">Marietta Tamil School Tuition Term 2 payment...</span>
+                  </div>
+                </div>
+
+                <!-- Thread 3: Meena Kumaravel -->
+                <div class="thread-item" onclick="switchActiveChatThread(3, 'Mrs. Meena Kumaravel', 'Grade 1-A Teacher', 'MK')">
+                  <div class="user-avatar" style="background-color: #9B59B6;">MK</div>
+                  <div class="thread-details">
+                    <div class="thread-top">
+                      <span class="thread-name">Mrs. Meena K.</span>
+                      <span class="thread-time">Jun 7</span>
+                    </div>
+                    <span class="thread-preview">He completed writing basic vowels neatly...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Chat area -->
+            <div class="chat-active-area">
+              <div class="chat-header">
+                <div class="chat-header-info">
+                  <div class="user-avatar" id="active-chat-avatar" style="background-color: var(--accent-cyan);">LR</div>
+                  <div>
+                    <h4 class="chat-header-name" id="active-chat-name">Mrs. Lakshmi Rajendran</h4>
+                    <p class="chat-header-sub" id="active-chat-role">Grade 3-A Teacher &bull; Student Context: Anika Kumar</p>
+                  </div>
+                </div>
+                <div>
+                  <button class="nav-icon-btn" onclick="alert('Initializing audio call (Simulation)...')"><i data-lucide="phone"></i></button>
+                  <button class="nav-icon-btn" onclick="alert('Initializing video call (Simulation)...')"><i data-lucide="video"></i></button>
+                </div>
+              </div>
+
+              <!-- Messages stream -->
+              <div class="chat-history" id="chat-stream">
+                <!-- Dynamically populated bubble messages -->
+              </div>
+
+              <div class="chat-quiet-notice">
+                <i data-lucide="moon" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i>
+                <span class="lang-en">Quiet hours: Messages sent after 9 PM will be reviewable next class day morning.</span>
+                <span class="lang-ta">இரவு 9 மணிக்கு மேல் அனுப்பப்படும் செய்திகள் அடுத்த நாள் காலை பரிசீலிக்கப்படும்.</span>
+              </div>
+
+              <!-- Input bar -->
+              <form onsubmit="handleSendMessage(event)" class="chat-input-bar">
+                <button type="button" class="nav-icon-btn" onclick="alert('Photo and file attachment simulator triggered.')">
+                  <i data-lucide="paperclip"></i>
+                </button>
+                <input type="text" class="chat-input" id="chat-message-input" placeholder="Type a message..." required>
+                <button type="submit" class="btn btn-primary" style="padding: 10px 20px;">
+                  <i data-lucide="send"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 8: Forms & Checklist -------------------- -->
+        <div class="content-panel" id="panel-checklist">
+          <div class="card">
+            <div class="card-title-group">
+              <div class="card-title">
+                <i data-lucide="clipboard-list"></i>
+                <span>MTS Campus Compliance Forms & Checklists</span>
+              </div>
+            </div>
+            <div class="card-content">
+              <p style="font-size:14px; color:var(--text-secondary); margin-bottom:8px;">
+                Please ensure all compliance forms are downloaded, signed, and checked. Checked items indicate completed agreements.
+              </p>
+              
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th style="width: 60px; text-align:center;">Status</th>
+                      <th>Form Document Name</th>
+                      <th>Academic Term</th>
+                      <th>Due Date</th>
+                      <th style="text-align:right;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="text-align:center;">
+                        <input type="checkbox" id="chk-form-tuition" style="width:18px; height:18px;" onchange="toggleChecklistForm('tuition', this)">
+                      </td>
+                      <td><strong>Tuition Fee Payment Agreement Form</strong><br><span style="font-size:12px; color:var(--text-secondary);">Required for term enrollment confirmation.</span></td>
+                      <td>AY 2025-26</td>
+                      <td>Jun 20, 2025</td>
+                      <td style="text-align:right;">
+                        <button class="btn btn-secondary btn-sm" onclick="alert('Downloading Tuition Agreement PDF Template...')">📎 Download Form</button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="text-align:center;">
+                        <input type="checkbox" id="chk-form-medical" style="width:18px; height:18px;" onchange="toggleChecklistForm('medical', this)">
+                      </td>
+                      <td><strong>Emergency Medical Treatment Consent & Authorization</strong><br><span style="font-size:12px; color:var(--text-secondary);">Medical release form for allergy treatment protocols.</span></td>
+                      <td>AY 2025-26</td>
+                      <td>Jun 30, 2025</td>
+                      <td style="text-align:right;">
+                        <button class="btn btn-secondary btn-sm" onclick="alert('Downloading Emergency Medical Release PDF Template...')">📎 Download Form</button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="text-align:center;">
+                        <input type="checkbox" id="chk-form-photo" style="width:18px; height:18px;" onchange="toggleChecklistForm('photo', this)">
+                      </td>
+                      <td><strong>Marietta School Event Photo & Media Consent Form</strong><br><span style="font-size:12px; color:var(--text-secondary);">Authorizes MTS to publish event pictures.</span></td>
+                      <td>AY 2025-26</td>
+                      <td>Aug 15, 2025</td>
+                      <td style="text-align:right;">
+                        <button class="btn btn-secondary btn-sm" onclick="alert('Downloading Media Release Consent PDF Template...')">📎 Download Form</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 9: Account / Settings -------------------- -->
+        <div class="content-panel" id="panel-settings">
+          <div class="grid-2">
+            <!-- Profile Info card -->
+            <div class="card">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <i data-lucide="user"></i>
+                  <span>Guardian Contact Information</span>
+                </div>
+              </div>
+              <form onsubmit="handleParentContactSubmit(event)" style="display:flex; flex-direction:column; gap:12px;">
+                <div class="form-group">
+                  <label class="form-label" for="parent-settings-name">Full Name</label>
+                  <input type="text" class="form-input" id="parent-settings-name" value="Priya Kumar" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="parent-settings-email">Email Address</label>
+                  <input type="email" class="form-input" id="parent-settings-email" value="parent@mts.edu" readonly>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="parent-settings-phone">Phone Number</label>
+                  <input type="text" class="form-input" id="parent-settings-phone" value="404-555-0245" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" style="width:fit-content;">Save Information</button>
+              </form>
+            </div>
+
+            <!-- Notifications preferences matrix -->
+            <div class="card">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <i data-lucide="bell"></i>
+                  <span>Notification Dispatch Matrix Preferences</span>
+                </div>
+              </div>
+              <form onsubmit="handleParentMatrixSubmit(event)" style="display:flex; flex-direction:column; gap:16px;">
+                <div class="table-container">
+                  <table class="table" style="font-size:12.5px;">
+                    <thead>
+                      <tr>
+                        <th style="text-align:left;">Category</th>
+                        <th>Push</th>
+                        <th>Email</th>
+                        <th>In-App</th>
+                        <th>WhatsApp</th>
+                      </tr>
+                    </thead>
+                    <tbody id="parent-matrix-tbody">
+                      <!-- Loaded dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" style="width:fit-content;">Save Preferences</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Time Slot Booking Modal -->
+  <div class="modal-overlay" id="pt-slot-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Book Parent-Teacher Slot (Jun 21)</h3>
+        <button class="modal-close" onclick="closeModal('pt-slot-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px; color: var(--text-secondary);">
+          Select a 15-minute slot to meet with the teacher. Muted grey slots have already been reserved by other parents.
+        </p>
+        <div class="slot-grid" id="pt-modal-slots-grid">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('pt-slot-modal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

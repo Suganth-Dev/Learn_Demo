@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MTS Connect - Teacher Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .quick-action-bar {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .action-btn-card {
+      background-color: var(--white);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--primary-navy);
+      box-shadow: var(--shadow);
+      transition: all 0.2s;
+      flex: 1;
+      text-decoration: none;
+    }
+    .action-btn-card:hover {
+      border-color: var(--accent-cyan);
+      background-color: rgba(0, 174, 203, 0.02);
+      transform: translateY(-2px);
+    }
+    .action-btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background-color: var(--accent-cyan-light);
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .comment-tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 8px 0;
+    }
+    .comment-tag {
+      background-color: var(--bg-light);
+      border: 1px dashed var(--accent-cyan);
+      color: var(--primary-navy);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .comment-tag:hover {
+      background-color: var(--accent-cyan-light);
+      border-color: var(--accent-cyan);
+    }
+    .hw-file-mock {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--bg-light);
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 8px 0;
+    }
+    .hw-file-icon {
+      font-size: 24px;
+      color: var(--accent-cyan);
+    }
+    .attendance-radios {
+      display: flex;
+      gap: 16px;
+    }
+    .radio-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      font-size: 13.5px;
+      cursor: pointer;
+    }
+    .radio-label input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary-navy);
+    }
+    .attendance-summary-bar {
+      background-color: var(--white);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-lg);
+      padding: 16px 24px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+    }
+    .summary-stat {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .summary-stat strong {
+      font-size: 20px;
+      color: var(--primary-navy);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container" style="display: block;">
+    <!-- Shared Sidebar (Teacher View) -->
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-brand">
+          <div class="sidebar-logo">த</div>
+          <div class="brand-text">MTS <span>Connect</span></div>
+        </div>
+        <ul class="sidebar-menu">
+          <li class="sidebar-item active">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="home"></i>
+              <span class="lang-en">Home</span>
+              <span class="lang-ta">முகப்பு</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="book-open"></i>
+              <span class="lang-en">My Classes</span>
+              <span class="lang-ta">எனது வகுப்புகள்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="calendar-check"></i>
+              <span class="lang-en">Attendance</span>
+              <span class="lang-ta">வருகைப்பதிவு</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="file-edit"></i>
+              <span class="lang-en">Homework</span>
+              <span class="lang-ta">வீட்டுப்பாடம்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="megaphone"></i>
+              <span class="lang-en">Announcements</span>
+              <span class="lang-ta">அறிவிப்புகள்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="calendar"></i>
+              <span class="lang-en">Calendar</span>
+              <span class="lang-ta">நாட்காட்டி</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="message-square"></i>
+              <span class="lang-en">Messages</span>
+              <span class="lang-ta">செய்திகள்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="settings"></i>
+              <span class="lang-en">Settings</span>
+              <span class="lang-ta">அமைப்புகள்</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- User Info Card -->
+      <div class="sidebar-user">
+        <div class="user-card">
+          <div class="user-avatar">LR</div>
+          <div class="user-info">
+            <div class="user-name">Lakshmi Rajendran</div>
+            <div class="user-role-badge">Teacher</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Panel -->
+    <main class="main-content">
+      <!-- Navbar (shared) -->
+      <nav class="navbar">
+        <div class="navbar-left">
+          <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="navbar-title">
+            <span class="lang-en">Teacher Portal</span>
+            <span class="lang-ta">ஆசிரியர் தளம்</span>
+          </div>
+        </div>
+
+        <div class="navbar-right">
+          <button class="nav-icon-btn" id="notification-bell-btn">
+            <i data-lucide="bell"></i>
+            <span class="badge-count">3</span>
+          </button>
+
+          <button class="lang-btn">
+            <i data-lucide="globe"></i>
+            <span class="lang-btn-text">தமிழ்</span>
+          </button>
+
+          <div class="profile-menu">
+            <button class="profile-trigger">
+              <div class="profile-avatar">LR</div>
+              <i data-lucide="chevron-down" style="width: 16px; height: 16px; color: var(--text-secondary);"></i>
+            </button>
+            <div class="profile-dropdown">
+              <a href="#" class="dropdown-item" onclick="document.querySelector('[data-lucide=settings]').parentElement.click()">
+                <i data-lucide="user" style="width:16px; height:16px;"></i> Profile
+              </a>
+              <a href="#" class="dropdown-item" onclick="document.querySelector('[data-lucide=settings]').parentElement.click()">
+                <i data-lucide="settings" style="width:16px; height:16px;"></i> Settings
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="index.html" class="dropdown-item">
+                <i data-lucide="log-out" style="width:16px; height:16px;"></i> Sign Out
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Page Content -->
+      <div class="page-container">
+        <!-- Breadcrumbs -->
+        <div class="breadcrumb">
+          <span>MTS Connect</span>
+          <span class="breadcrumb-separator">&gt;</span>
+          <span>Teacher Portal</span>
+          <span class="breadcrumb-separator">&gt;</span>
+          <span id="teacher-breadcrumb-active-text">Home Dashboard</span>
+        </div>
+
+        <!-- -------------------- Panel 1: Home Dashboard -------------------- -->
+        <div class="content-panel active" id="panel-home">
+          <!-- Welcome banner -->
+          <div style="background-color: var(--white); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <h2 style="font-size: 22px; font-weight: 800; color: var(--primary-navy);">
+                <span class="lang-en">Good Evening, Mrs. Lakshmi 👋</span>
+                <span class="lang-ta">இனிய மாலை வணக்கம், திருமதி. லட்சுமி 👋</span>
+              </h2>
+              <p style="color: var(--text-secondary); font-size:14.5px; margin-top: 4px;">
+                <span class="lang-en">Friday is class day — attendance is due. Review pending homework uploads.</span>
+                <span class="lang-ta">வெள்ளிக்கிழமை வகுப்பு நாள் — வருகைப்பதிவு செய்ய வேண்டும். வீட்டுப்பாடங்களை பரிசீலிக்கவும்.</span>
+              </p>
+            </div>
+            <span class="badge badge-amber" style="padding: 8px 16px; font-size: 13px;">
+              <i data-lucide="alert-circle" style="width:14px; height:14px;"></i> Friday Session Live
+            </span>
+          </div>
+
+          <!-- Quick Action Bar -->
+          <div class="quick-action-bar">
+            <div class="action-btn-card" onclick="document.querySelector('[data-lucide=calendar-check]').parentElement.click()">
+              <div class="action-btn-icon"><i data-lucide="calendar-check"></i></div>
+              <span>Take Attendance</span>
+            </div>
+            <div class="action-btn-card" onclick="document.querySelector('[data-lucide=file-edit]').parentElement.click(); openModal('new-hw-modal');">
+              <div class="action-btn-icon"><i data-lucide="plus-circle"></i></div>
+              <span>New Homework</span>
+            </div>
+            <div class="action-btn-card" onclick="document.querySelector('[data-lucide=megaphone]').parentElement.click()">
+              <div class="action-btn-icon"><i data-lucide="megaphone"></i></div>
+              <span>Announcements Log</span>
+            </div>
+            <div class="action-btn-card" onclick="document.querySelector('[data-lucide=message-square]').parentElement.click()">
+              <div class="action-btn-icon"><i data-lucide="message-square"></i></div>
+              <span>Message Parent</span>
+            </div>
+          </div>
+
+          <!-- Active classes grid widgets -->
+          <div class="grid-2" id="teacher-home-classes-grid">
+            <!-- Dynamic Classes Summary Cards loaded from local storage -->
+          </div>
+
+          <div class="grid-2">
+            <!-- Weekly Stats card -->
+            <div class="card">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <i data-lucide="bar-chart-2"></i>
+                  <span>Weekly Roster Metrics</span>
+                </div>
+              </div>
+              <div class="card-content" style="gap: 16px;">
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:600; margin-bottom:4px;">
+                    <span>Attendance Sessions Completed</span>
+                    <span id="teacher-attendance-kpi-txt">80% (4/5 Classes)</span>
+                  </div>
+                  <div style="height:8px; background-color:var(--border-color); border-radius:4px; overflow:hidden;">
+                    <div id="teacher-attendance-kpi-bar" style="width:80%; height:100%; background-color:var(--success-green);"></div>
+                  </div>
+                </div>
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:600; margin-bottom:4px;">
+                    <span>Homework Submissions Evaluated</span>
+                    <span>92% (23/25 Submissions)</span>
+                  </div>
+                  <div style="height:8px; background-color:var(--border-color); border-radius:4px; overflow:hidden;">
+                    <div style="width:92%; height:100%; background-color:var(--accent-cyan);"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent activity messages -->
+            <div class="card">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <i data-lucide="inbox"></i>
+                  <span>Recent Parent Message Preview</span>
+                </div>
+              </div>
+              <div class="card-content" style="gap:10px;">
+                <div style="background-color: var(--bg-light); padding:12px; border-radius:8px; font-size:13px;">
+                  <div style="display:flex; justify-content:space-between; font-weight:700;">
+                    <span>Priya Kumar (Anika's Mother)</span>
+                    <span style="color:var(--text-secondary); font-size:11px;">2h ago</span>
+                  </div>
+                  <p style="margin-top:4px; color:var(--text-secondary);">Anika practiced the recitation. She completed vowel letter homework...</p>
+                  <div style="margin-top:6px; text-align:right;">
+                    <button class="btn btn-secondary btn-sm" style="padding:2px 8px; font-size:10px;" onclick="document.querySelector('[data-lucide=message-square]').parentElement.click()">Open Roster Chat</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 2: My Classes Roster Directory -------------------- -->
+        <div class="content-panel" id="panel-classes">
+          <div class="card">
+            <div class="card-title-group">
+              <div class="card-title">
+                <i data-lucide="book-open"></i>
+                <span>My Assigned Classes & Student Directory</span>
+              </div>
+            </div>
+            <div class="card-content">
+              <div class="tabs-container">
+                <button class="tab-btn active" id="class-roster-tab-3a" onclick="switchClassRosterView('Grade 3-A')">Grade 3-A Roster</button>
+                <button class="tab-btn" id="class-roster-tab-4b" onclick="switchClassRosterView('Grade 4-B')">Grade 4-B Roster</button>
+              </div>
+
+              <div class="table-container" style="margin-top:16px;">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Student ID</th>
+                      <th>Full Name (Tamil)</th>
+                      <th>ITA ID</th>
+                      <th>Guardian Parent</th>
+                      <th>Contact Phone</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="teacher-roster-table-tbody">
+                    <!-- Loaded dynamically in app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 3: Attendance Taking Session -------------------- -->
+        <div class="content-panel" id="panel-attendance">
+          <div class="card">
+            <div class="card-title-group" style="border:none; padding:0;">
+              <div>
+                <span style="font-size:12px; font-weight:700; color:var(--text-secondary);">SESSION ACTIVE</span>
+                <h2 style="font-size: 22px; font-weight: 800; color: var(--primary-navy); margin-top:2px;">Grade 3-A &bull; Friday Attendance taking</h2>
+              </div>
+              <div style="display:flex; gap:12px; align-items:center;">
+                <span class="badge badge-amber" id="session-status-badge">🟡 In Progress</span>
+                <button class="btn btn-secondary btn-sm" onclick="alert('Roster draft progress saved locally.')">Save Draft</button>
+              </div>
+            </div>
+            <div style="display:flex; gap:32px; font-size:13.5px; margin-top: 6px; flex-wrap:wrap; border-top: 1px solid var(--border-color); padding-top:12px;">
+              <div><strong>Teacher:</strong> Mrs. Lakshmi R.</div>
+              <div><strong>Date:</strong> Friday, Jun 13, 2025</div>
+              <div><strong>Status Checklist:</strong> <span id="marked-fraction-text">3 / 4 marked</span></div>
+            </div>
+          </div>
+
+          <!-- Leave reports warnings banner -->
+          <div class="alert-banner alert-banner-yellow" id="leave-report-warning-banner" style="margin-top:16px; margin-bottom:16px;">
+            <div class="alert-banner-content">
+              <i data-lucide="alert-triangle"></i>
+              <span>
+                <strong>Excused Leave Reported:</strong> Anika Kumar &mdash; Reported by parent Priya Kumar: <em>"Doctor appointment"</em>.
+              </span>
+            </div>
+            <button class="btn btn-secondary btn-sm" style="padding:4px 10px;" onclick="applyParentReport()">Apply Leave Report</button>
+          </div>
+
+          <!-- Attendance taking table -->
+          <div class="card">
+            <div class="card-title-group">
+              <div class="card-title">
+                <i data-lucide="users"></i>
+                <span>Class Roster Sheet</span>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="markAllPresent()">Mark All Present</button>
+            </div>
+
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 50px;">#</th>
+                    <th>Student Name</th>
+                    <th>Tamil Name</th>
+                    <th>Mark Attendance</th>
+                    <th>Session Notes</th>
+                  </tr>
+                </thead>
+                <tbody id="teacher-attendance-taking-tbody">
+                  <!-- Dynamically populated student rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Bottom Sticky stats bar -->
+          <div class="attendance-summary-bar">
+            <div style="display:flex; gap:36px;">
+              <div class="summary-stat">Present: <strong id="summary-present">0</strong></div>
+              <div class="summary-stat">Absent: <strong id="summary-absent">0</strong></div>
+              <div class="summary-stat">Late: <strong id="summary-late">0</strong></div>
+              <div class="summary-stat">Unmarked: <strong id="summary-unmarked" style="color:var(--critical-red);">4</strong></div>
+            </div>
+            
+            <button class="btn btn-primary" id="finalise-attendance-btn" disabled onclick="finaliseAttendance()">
+              <i data-lucide="check-square"></i> Finalise Attendance Session
+            </button>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 4: Homework Hub -------------------- -->
+        <div class="content-panel" id="panel-homework">
+          <div class="tabs-container">
+            <button class="tab-btn active" id="hw-tab-active" onclick="switchHomeworkSubtab('active')">My Homework Assignments</button>
+            <button class="tab-btn" id="hw-tab-reviews" onclick="switchHomeworkSubtab('reviews')">Submissions Review Inbox</button>
+          </div>
+
+          <!-- Subtab 1: Homework Assignments -->
+          <div class="tab-panel active" id="subpanel-hw-active" style="margin-top:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <h3 style="font-weight:700; color:var(--primary-navy);">Active & Published Homework</h3>
+              <button class="btn btn-primary btn-sm" onclick="openModal('new-hw-modal')">+ Publish New Homework</button>
+            </div>
+
+            <div class="grid-2" id="teacher-active-assignments-container">
+              <!-- Dynamically seeded assignment card components -->
+            </div>
+          </div>
+
+          <!-- Subtab 2: Review Inbox -->
+          <div class="tab-panel" id="subpanel-hw-reviews" style="margin-top:16px; display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+              <h3 style="font-weight:700; color:var(--primary-navy);" id="submission-reviews-count-header">Homework Review Inbox</h3>
+              <div style="display:flex; gap:8px;">
+                <select class="form-input" style="padding:6px 12px; font-size:13px;" onchange="alert('Filter applied')">
+                  <option>All Assignments</option>
+                  <option>Tamil Alphabets Practice</option>
+                  <option>Thirukkural memorization</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:20px;" id="teacher-submissions-cards-list">
+              <!-- Dynamically populated evaluation cards -->
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 5: Announcements logs -------------------- -->
+        <div class="content-panel" id="panel-announcements">
+          <div class="card">
+            <div class="card-title-group">
+              <div class="card-title">
+                <i data-lucide="megaphone"></i>
+                <span>Dispatched Announcements Archives</span>
+              </div>
+            </div>
+            <div class="card-content" id="teacher-announcements-list">
+              <!-- Seeded logs of announcements -->
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 6: School Calendar Timeline -------------------- -->
+        <div class="content-panel" id="panel-calendar">
+          <div class="card">
+            <div class="card-title-group">
+              <div class="card-title">
+                <i data-lucide="calendar"></i>
+                <span>Teacher Academic Activities Calendar</span>
+              </div>
+            </div>
+            <div class="card-content">
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Activity Date</th>
+                      <th>Activity Event</th>
+                      <th>Target Roster</th>
+                      <th>Venue Location</th>
+                      <th>RSVP Counts</th>
+                    </tr>
+                  </thead>
+                  <tbody id="teacher-calendar-events-tbody">
+                    <!-- Seeded calendar events -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 7: Messages inbox -------------------- -->
+        <div class="content-panel" id="panel-messages">
+          <div class="chat-container">
+            <!-- Left sidebar threads -->
+            <div class="chat-threads">
+              <div class="chat-search-box">
+                <div class="search-input-wrapper">
+                  <i data-lucide="search" style="width:16px; height:16px;"></i>
+                  <input type="text" class="chat-search-input" placeholder="Search parent chats...">
+                </div>
+              </div>
+              <div class="threads-list">
+                <div class="thread-item active" onclick="switchTeacherChatThread(1, 'Priya Kumar', 'Mother of Anika Kumar', 'PK')">
+                  <div class="user-avatar" style="background-color: var(--accent-cyan);">PK</div>
+                  <div class="thread-details">
+                    <div class="thread-top">
+                      <span class="thread-name">Priya Kumar</span>
+                      <span class="thread-time">Just now</span>
+                    </div>
+                    <span class="thread-preview unread">She has been practicing spelling curves...</span>
+                  </div>
+                </div>
+                <div class="thread-item" onclick="switchTeacherChatThread(2, 'Anand Sharma', 'Father of Rohan Sharma', 'AS')">
+                  <div class="user-avatar" style="background-color: var(--primary-navy);">AS</div>
+                  <div class="thread-details">
+                    <div class="thread-top">
+                      <span class="thread-name">Anand Sharma</span>
+                      <span class="thread-time">Yesterday</span>
+                    </div>
+                    <span class="thread-preview">He completed writing அ, ஆ neatly...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active chat box -->
+            <div class="chat-active-area">
+              <div class="chat-header">
+                <div class="chat-header-info">
+                  <div class="user-avatar" id="teacher-active-chat-avatar" style="background-color: var(--accent-cyan);">PK</div>
+                  <div>
+                    <h4 class="chat-header-name" id="teacher-active-chat-name">Priya Kumar</h4>
+                    <p class="chat-header-sub" id="teacher-active-chat-role">Mother of Anika & Rohan Kumar</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Message stream -->
+              <div class="chat-history" id="teacher-chat-stream">
+                <!-- Populated dynamically in app.js -->
+              </div>
+
+              <!-- Input bar -->
+              <form onsubmit="handleTeacherSendMessage(event)" class="chat-input-bar">
+                <button type="button" class="nav-icon-btn" onclick="alert('Trigger attachments manager')">
+                  <i data-lucide="paperclip"></i>
+                </button>
+                <input type="text" class="chat-input" id="teacher-chat-message-input" placeholder="Type a message to parent..." required>
+                <button type="submit" class="btn btn-primary" style="padding: 10px 20px;">
+                  <i data-lucide="send"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 8: Settings and Profile -------------------- -->
+        <div class="content-panel" id="panel-settings">
+          <div class="card">
+            <div class="card-title-group">
+              <div class="card-title">
+                <i data-lucide="user"></i>
+                <span>Teacher Profile Account Information</span>
+              </div>
+            </div>
+            <div class="card-content">
+              <form onsubmit="event.preventDefault(); alert('Teacher profile configurations saved.');" class="form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div class="form-group">
+                  <label class="form-label">Full Name</label>
+                  <input type="text" class="form-input" value="Mrs. Lakshmi Rajendran" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email Address</label>
+                  <input type="email" class="form-input" value="teacher@mts.edu" readonly>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Phone Number</label>
+                  <input type="text" class="form-input" value="404-555-9831" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Assigned Grades</label>
+                  <input type="text" class="form-input" value="Grade 3-A & Grade 4-B" readonly>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" style="grid-column: span 2; width:fit-content; justify-self:flex-end;">Save Profile Settings</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- New Homework Publish Modal -->
+  <div class="modal-overlay" id="new-hw-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Publish New Homework Assignment</h3>
+        <button class="modal-close" onclick="closeModal('new-hw-modal')">&times;</button>
+      </div>
+      <form onsubmit="handleNewHomeworkSubmit(event)">
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+          <div class="form-group">
+            <label class="form-label" for="hw-title">Assignment Title (English)</label>
+            <input type="text" class="form-input" id="hw-title" required placeholder="e.g. Write basic vowels 5 times">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="hw-title-ta">Assignment Title (Tamil)</label>
+            <input type="text" class="form-input tamil-font" id="hw-title-ta" placeholder="எ.கா. உயிர் எழுத்துக்களை எழுதவும்">
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label class="form-label" for="hw-class">Target Class</label>
+              <select class="form-input" id="hw-class">
+                <option>Grade 3-A</option>
+                <option>Grade 4-B</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="hw-due">Due Date</label>
+              <input type="date" class="form-input" id="hw-due" required value="2025-06-15">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="hw-desc">Instructions (English)</label>
+            <textarea class="form-input" id="hw-desc" rows="3" placeholder="Enter instructions for students..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('new-hw-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Publish Assignment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

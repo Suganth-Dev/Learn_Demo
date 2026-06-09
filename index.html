@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MTS Connect — Tamil School Digital Campus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+Tamil:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #050d1a;
+      --navy2: #0a1628;
+      --cyan: #00d4ff;
+      --cyan2: #0099cc;
+      --violet: #7c3aed;
+      --violet2: #a855f7;
+      --gold: #f59e0b;
+      --white: #ffffff;
+      --glass: rgba(255,255,255,0.04);
+      --glass-border: rgba(255,255,255,0.10);
+      --text-muted: rgba(255,255,255,0.45);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Outfit', 'Noto Sans Tamil', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      overflow: hidden;
+    }
+
+    /* ─── AURORA CANVAS ─── */
+    #aurora-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ─── GRID LINES ─── */
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    /* ─── LAYOUT ─── */
+    .page-layout {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 480px;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ─── LEFT PANEL ─── */
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px 56px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* floating orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+    }
+    .orb-1 {
+      width: 480px; height: 480px;
+      background: radial-gradient(circle, rgba(0,212,255,0.15) 0%, transparent 70%);
+      top: -100px; left: -100px;
+      animation: drift1 14s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+      width: 360px; height: 360px;
+      background: radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 70%);
+      bottom: 0px; right: 60px;
+      animation: drift2 18s ease-in-out infinite alternate;
+    }
+    .orb-3 {
+      width: 240px; height: 240px;
+      background: radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%);
+      top: 40%; left: 40%;
+      animation: drift3 22s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift1 { from{transform:translate(0,0)} to{transform:translate(60px,40px)} }
+    @keyframes drift2 { from{transform:translate(0,0)} to{transform:translate(-40px,-30px)} }
+    @keyframes drift3 { from{transform:translate(0,0)} to{transform:translate(30px,-50px)} }
+
+    /* Brand */
+    .brand-logo-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .logo-mark {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--violet) 100%);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; font-weight: 900; color: white;
+      box-shadow: 0 0 30px rgba(0,212,255,0.4), 0 0 0 1px rgba(0,212,255,0.3);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .logo-mark::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 17px;
+      border: 1px solid rgba(0,212,255,0.25);
+    }
+
+    .brand-name {
+      font-size: 26px; font-weight: 800; letter-spacing: -0.5px;
+    }
+    .brand-name span { color: var(--cyan); }
+    .brand-tagline {
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 2px; margin-top: 1px;
+    }
+
+    /* Hero text */
+    .hero-section {
+      position: relative; z-index: 2;
+    }
+
+    .hero-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 12px; font-weight: 600;
+      color: var(--cyan);
+      letter-spacing: 0.5px;
+      margin-bottom: 24px;
+    }
+    .hero-label .dot {
+      width: 6px; height: 6px;
+      background: var(--cyan);
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.6); }
+    }
+
+    .hero-heading {
+      font-size: clamp(36px, 3.5vw, 58px);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -2px;
+      margin-bottom: 20px;
+    }
+    .hero-heading .line1 { display: block; color: white; }
+    .hero-heading .line2 {
+      display: block;
+      background: linear-gradient(90deg, var(--cyan) 0%, var(--violet2) 60%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-heading .line3 { display: block; color: rgba(255,255,255,0.7); font-weight: 400; font-size: 0.62em; letter-spacing: -0.5px; margin-top: 8px; }
+
+    .tamil-text {
+      font-family: 'Noto Sans Tamil', sans-serif;
+      font-size: 17px; font-weight: 500;
+      color: rgba(0,212,255,0.7);
+      margin-bottom: 32px;
+      letter-spacing: 0.3px;
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: flex; gap: 32px; margin-bottom: 40px;
+    }
+    .stat-item {}
+    .stat-number {
+      font-size: 34px; font-weight: 800;
+      color: var(--white);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-number span { color: var(--cyan); }
+    .stat-label {
+      font-size: 12px; color: var(--text-muted);
+      font-weight: 500; margin-top: 4px;
+    }
+    .stat-divider {
+      width: 1px;
+      background: rgba(255,255,255,0.1);
+      align-self: stretch;
+    }
+
+    /* Feature chips */
+    .feature-chips {
+      display: flex; flex-wrap: wrap; gap: 10px;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-size: 12.5px; font-weight: 600;
+      color: rgba(255,255,255,0.75);
+      transition: all 0.3s;
+      backdrop-filter: blur(10px);
+    }
+    .chip:hover {
+      border-color: rgba(0,212,255,0.35);
+      color: var(--cyan);
+      background: rgba(0,212,255,0.06);
+    }
+    .chip i { width: 13px; height: 13px; color: var(--cyan); }
+
+    /* Bottom bar */
+    .left-bottom {
+      position: relative; z-index: 2;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .left-bottom-info { font-size: 12px; color: var(--text-muted); }
+    .version-pill {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 4px 12px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    /* ─── RIGHT PANEL — LOGIN ─── */
+    .right-panel {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 32px 32px 32px 48px;
+      position: relative;
+      background: rgba(5, 15, 30, 0.5);
+      backdrop-filter: blur(24px);
+      border-left: 1px solid rgba(255,255,255,0.07);
+    }
+
+    /* Subtle vertical glow line on divider */
+    .right-panel::before {
+      content: '';
+      position: absolute;
+      left: -1px; top: 10%; bottom: 10%;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--cyan), transparent);
+      opacity: 0.4;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    /* Card header */
+    .card-header {
+      margin-bottom: 28px;
+    }
+    .card-header-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px; font-weight: 700; color: var(--cyan);
+      letter-spacing: 1px; text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .card-header h2 {
+      font-size: 28px; font-weight: 800; letter-spacing: -0.8px;
+      color: var(--white); margin-bottom: 5px;
+    }
+    .card-header p {
+      font-size: 13.5px; color: var(--text-muted);
+    }
+
+    /* Role tabs */
+    .role-tabs {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+    .role-tab {
+      background: none; border: none;
+      padding: 10px 6px;
+      font-size: 13px; font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
+      font-family: 'Outfit', sans-serif;
+    }
+    .role-tab i { width: 15px; height: 15px; }
+    .role-tab:hover { color: rgba(255,255,255,0.8); }
+    .role-tab.active {
+      background: linear-gradient(135deg, rgba(0,212,255,0.15) 0%, rgba(124,58,237,0.15) 100%);
+      color: var(--white);
+      border: 1px solid rgba(0,212,255,0.25);
+      box-shadow: 0 0 16px rgba(0,212,255,0.12);
+    }
+
+    /* Role indicator */
+    .role-indicator {
+      text-align: center;
+      font-size: 13px; font-weight: 600;
+      color: var(--cyan);
+      margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+    }
+
+    /* Form elements */
+    .form-group {
+      display: flex; flex-direction: column; gap: 6px;
+      margin-bottom: 14px;
+    }
+    .form-label {
+      font-size: 12.5px; font-weight: 600;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.3px;
+    }
+    .form-input-wrapper { position: relative; }
+    .form-input {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--white);
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.25s;
+      outline: none;
+    }
+    .form-input::placeholder { color: rgba(255,255,255,0.2); }
+    .form-input:focus {
+      border-color: var(--cyan);
+      background: rgba(0,212,255,0.05);
+      box-shadow: 0 0 0 3px rgba(0,212,255,0.1), 0 0 20px rgba(0,212,255,0.08);
+    }
+    .pw-toggle {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.35); transition: color 0.2s;
+      display: flex;
+    }
+    .pw-toggle:hover { color: var(--cyan); }
+
+    /* Options row */
+    .form-options {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+    .checkbox-label {
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer; color: rgba(255,255,255,0.5); font-weight: 500;
+    }
+    .checkbox-label input { accent-color: var(--cyan); width: 14px; height: 14px; }
+    .forgot-link {
+      color: var(--cyan); font-weight: 600;
+      text-decoration: none; font-size: 13px;
+      transition: opacity 0.2s;
+    }
+    .forgot-link:hover { opacity: 0.7; }
+
+    /* CTA Button */
+    .btn-signin {
+      width: 100%;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #00c6f0 0%, #006ee6 100%);
+      border: none; border-radius: 10px;
+      font-size: 15px; font-weight: 700;
+      color: var(--white); cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: 0.2px;
+      position: relative; overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+      box-shadow: 0 4px 24px rgba(0,150,255,0.3);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-signin::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .btn-signin:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,150,255,0.45); }
+    .btn-signin:hover::before { opacity: 1; }
+    .btn-signin:active { transform: translateY(0); }
+
+    /* Divider */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 16px 0; color: rgba(255,255,255,0.2); font-size: 11.5px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1.5px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1);
+    }
+
+    /* Create account */
+    .btn-outline {
+      width: 100%;
+      padding: 12px 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      font-size: 14px; font-weight: 600;
+      color: rgba(255,255,255,0.7); cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.25s;
+      margin-bottom: 20px;
+    }
+    .btn-outline:hover {
+      border-color: rgba(255,255,255,0.25);
+      color: white;
+      background: rgba(255,255,255,0.07);
+    }
+
+    /* Demo credentials */
+    .demo-card {
+      background: rgba(0,212,255,0.04);
+      border: 1px solid rgba(0,212,255,0.15);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 4px;
+    }
+    .demo-card-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .demo-card-title i { color: var(--cyan); width: 14px; height: 14px; }
+
+    .demo-btn {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 9px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; margin-bottom: 8px;
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.2s;
+    }
+    .demo-btn:last-child { margin-bottom: 0; }
+    .demo-btn:hover {
+      border-color: rgba(0,212,255,0.3);
+      background: rgba(0,212,255,0.05);
+      transform: translateX(3px);
+    }
+    .demo-btn-left { display: flex; align-items: center; gap: 10px; }
+    .demo-role-icon {
+      width: 28px; height: 28px; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .demo-role-icon.parent { background: rgba(16,185,129,0.15); }
+    .demo-role-icon.teacher { background: rgba(59,130,246,0.15); }
+    .demo-role-icon.admin { background: rgba(245,158,11,0.15); }
+    .demo-role-name { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); }
+    .demo-email { font-size: 11px; font-family: monospace; color: rgba(255,255,255,0.35); margin-top: 1px; }
+    .demo-arrow { color: rgba(255,255,255,0.2); transition: color 0.2s; }
+    .demo-btn:hover .demo-arrow { color: var(--cyan); }
+
+    /* Privacy note */
+    .privacy-note {
+      text-align: center; font-size: 11px; color: rgba(255,255,255,0.2);
+      margin-top: 14px; line-height: 1.5;
+    }
+
+    /* ─── ANIMATED PARTICLES ─── */
+    .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .particle {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: var(--cyan);
+      border-radius: 50%;
+      opacity: 0;
+      animation: float-up linear infinite;
+    }
+    @keyframes float-up {
+      0% { transform: translateY(100vh) scale(0); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.3; }
+      100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+    }
+
+    /* ─── BILINGUAL TOGGLE ─── */
+    body.lang-tamil .lang-en { display: none !important; }
+    body:not(.lang-tamil) .lang-ta { display: none !important; }
+
+    .lang-toggle {
+      position: fixed; top: 24px; right: 36px; z-index: 100;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      display: flex; align-items: center; gap: 7px;
+      font-family: 'Outfit', 'Noto Sans Tamil', sans-serif;
+      transition: all 0.2s;
+    }
+    .lang-toggle:hover { border-color: rgba(0,212,255,0.3); color: var(--cyan); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1100px) {
+      .page-layout { grid-template-columns: 1fr; }
+      .left-panel { display: none; }
+      .right-panel { 
+        background: var(--navy2); 
+        border-left: none;
+        padding: 32px 24px;
+      }
+      html, body { overflow: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating particles -->
+  <div class="particles" id="particles-container"></div>
+
+  <!-- Grid overlay -->
+  <div class="grid-overlay"></div>
+
+  <!-- Aurora canvas -->
+  <canvas id="aurora-canvas"></canvas>
+
+  <!-- Language toggle -->
+  <button class="lang-toggle lang-btn" onclick="toggleLanguage()">
+    <i data-lucide="globe" style="width:14px;height:14px;"></i>
+    <span class="lang-btn-text">தமிழ்</span>
+  </button>
+
+  <div class="page-layout">
+    <!-- ══════════════════ LEFT PANEL ══════════════════ -->
+    <div class="left-panel">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+
+      <!-- Brand -->
+      <div class="brand-logo-row">
+        <div class="logo-mark">த</div>
+        <div>
+          <div class="brand-name">MTS <span>Connect</span></div>
+          <div class="brand-tagline">Digital Campus Platform</div>
+        </div>
+      </div>
+
+      <!-- Hero -->
+      <div class="hero-section">
+        <div class="hero-label">
+          <div class="dot"></div>
+          <span class="lang-en">Live Platform · AY 2025-26</span>
+          <span class="lang-ta">நேரடி தளம் · கல்வியாண்டு 2025-26</span>
+        </div>
+
+        <h1 class="hero-heading">
+          <span class="line1 lang-en">Your Tamil School,</span>
+          <span class="line1 lang-ta">உங்கள் தமிழ் பள்ளி,</span>
+          <span class="line2 lang-en">Fully Connected.</span>
+          <span class="line2 lang-ta">முழுமையாக இணைந்தது.</span>
+          <span class="line3 lang-en">One platform. Every parent, teacher, and admin — in sync.</span>
+          <span class="line3 lang-ta">ஒரே தளம். ஒவ்வொரு பெற்றோர், ஆசிரியர், நிர்வாகி — இணைந்தனர்.</span>
+        </h1>
+
+        <div class="tamil-text lang-ta">மாரியெட்டா தமிழ்ப் பள்ளி · ஜார்ஜியா</div>
+        <div class="tamil-text lang-en" style="font-family: 'Noto Sans Tamil', sans-serif;">மாரியெட்டா தமிழ்ப் பள்ளி · Georgia</div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+          <div class="stat-item">
+            <div class="stat-number"><span id="counter-students">0</span>+</div>
+            <div class="stat-label">Active Students</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <div class="stat-number"><span id="counter-teachers">0</span></div>
+            <div class="stat-label">Educators</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <div class="stat-number"><span id="counter-families">0</span>+</div>
+            <div class="stat-label">Families</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <div class="stat-number"><span id="counter-uptime">0</span><span style="font-size:18px;color:rgba(255,255,255,0.4);">%</span></div>
+            <div class="stat-label">Uptime</div>
+          </div>
+        </div>
+
+        <!-- Feature chips -->
+        <div class="feature-chips">
+          <div class="chip"><i data-lucide="shield-check"></i> Secure Portal</div>
+          <div class="chip"><i data-lucide="bell"></i> Smart Alerts</div>
+          <div class="chip"><i data-lucide="message-circle"></i> Parent Chat</div>
+          <div class="chip"><i data-lucide="calendar-check"></i> Attendance</div>
+          <div class="chip"><i data-lucide="book-open"></i> Homework Hub</div>
+          <div class="chip"><i data-lucide="globe"></i> Bilingual UI</div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="left-bottom">
+        <div class="left-bottom-info">© 2026 Marietta Tamil School</div>
+        <div class="version-pill">v3.0 BETA</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ RIGHT PANEL — LOGIN ══════════════════ -->
+    <div class="right-panel">
+      <div class="login-card">
+
+        <!-- Header -->
+        <div class="card-header">
+          <div class="card-header-badge">
+            <i data-lucide="lock" style="width:10px;height:10px;"></i>
+            Secure Login
+          </div>
+          <h2>
+            <span class="lang-en">Welcome Back</span>
+            <span class="lang-ta">நல்வரவு</span>
+          </h2>
+          <p>
+            <span class="lang-en">Sign in to your MTS Connect account</span>
+            <span class="lang-ta">உங்கள் கணக்கில் உள்நுழையவும்</span>
+          </p>
+        </div>
+
+        <!-- Role Tabs -->
+        <div class="role-tabs" id="login-role-tabs">
+          <button class="role-tab active" data-role="parent">
+            <i data-lucide="users"></i>
+            <span class="lang-en">Parent</span>
+            <span class="lang-ta">பெற்றோர்</span>
+          </button>
+          <button class="role-tab" data-role="teacher">
+            <i data-lucide="graduation-cap"></i>
+            <span class="lang-en">Teacher</span>
+            <span class="lang-ta">ஆசிரியர்</span>
+          </button>
+          <button class="role-tab" data-role="admin">
+            <i data-lucide="shield"></i>
+            <span class="lang-en">Admin</span>
+            <span class="lang-ta">நிர்வாகி</span>
+          </button>
+        </div>
+
+        <!-- Role indicator -->
+        <div class="role-indicator">
+          <i id="role-indicator-icon" data-lucide="users" style="width:15px;height:15px;"></i>
+          <span id="role-indicator-text" class="lang-en">Parent Sign In</span>
+          <span id="role-indicator-text-ta" class="lang-ta">பெற்றோர் உள்நுழைவு</span>
+        </div>
+
+        <!-- Form -->
+        <form id="login-form" onsubmit="handleLoginSubmit(event)">
+          <div class="form-group">
+            <label class="form-label">
+              <span class="lang-en">Email Address</span>
+              <span class="lang-ta">மின்னஞ்சல்</span>
+            </label>
+            <div class="form-input-wrapper">
+              <input class="form-input" type="email" id="login-email" required placeholder="name@mts.edu">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <span class="lang-en">Password</span>
+              <span class="lang-ta">கடவுச்சொல்</span>
+            </label>
+            <div class="form-input-wrapper">
+              <input class="form-input" type="password" id="login-password" required placeholder="••••••••" style="padding-right:44px;">
+              <button type="button" class="pw-toggle" onclick="togglePasswordVisibility()">
+                <i id="password-toggle-icon" data-lucide="eye" style="width:17px;height:17px;"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <label class="checkbox-label">
+              <input type="checkbox" id="remember-me">
+              <span>
+                <span class="lang-en">Remember me</span>
+                <span class="lang-ta">நினைவில் கொள்க</span>
+              </span>
+            </label>
+            <a href="#" class="forgot-link" onclick="alert('Password reset link sent to your registered email (Simulation).')">
+              <span class="lang-en">Forgot?</span>
+              <span class="lang-ta">மறந்தீர்களா?</span>
+            </a>
+          </div>
+
+          <button type="submit" class="btn-signin" id="signin-btn">
+            <i data-lucide="log-in" style="width:17px;height:17px;"></i>
+            <span class="lang-en">Sign In to Portal →</span>
+            <span class="lang-ta">உள்நுழைக →</span>
+          </button>
+        </form>
+
+        <div class="divider">
+          <span class="lang-en">or</span>
+          <span class="lang-ta">அல்லது</span>
+        </div>
+
+        <button class="btn-outline" onclick="alert('Redirecting to Parent Account Registration (Simulation)')">
+          <span class="lang-en">+ Create Parent Account</span>
+          <span class="lang-ta">+ பெற்றோர் கணக்கை உருவாக்கவும்</span>
+        </button>
+
+        <!-- Demo credentials -->
+        <div class="demo-card">
+          <div class="demo-card-title">
+            <i data-lucide="zap"></i>
+            <span class="lang-en">Quick Demo — Auto-fill & Login</span>
+            <span class="lang-ta">டெமோ — தானாக நிரப்பு</span>
+          </div>
+
+          <button class="demo-btn" onclick="autoFill('parent','parent@mts.edu','Parent@123')">
+            <div class="demo-btn-left">
+              <div class="demo-role-icon parent">👨‍👩‍👧</div>
+              <div>
+                <div class="demo-role-name">Parent Portal</div>
+                <div class="demo-email">parent@mts.edu</div>
+              </div>
+            </div>
+            <i data-lucide="arrow-right" class="demo-arrow" style="width:15px;height:15px;"></i>
+          </button>
+
+          <button class="demo-btn" onclick="autoFill('teacher','teacher@mts.edu','Teacher@123')">
+            <div class="demo-btn-left">
+              <div class="demo-role-icon teacher">👩‍🏫</div>
+              <div>
+                <div class="demo-role-name">Teacher Portal</div>
+                <div class="demo-email">teacher@mts.edu</div>
+              </div>
+            </div>
+            <i data-lucide="arrow-right" class="demo-arrow" style="width:15px;height:15px;"></i>
+          </button>
+
+          <button class="demo-btn" onclick="autoFill('admin','admin@mts.edu','Admin@123')">
+            <div class="demo-btn-left">
+              <div class="demo-role-icon admin">🛠️</div>
+              <div>
+                <div class="demo-role-name">Admin Console</div>
+                <div class="demo-email">admin@mts.edu</div>
+              </div>
+            </div>
+            <i data-lucide="arrow-right" class="demo-arrow" style="width:15px;height:15px;"></i>
+          </button>
+        </div>
+
+        <p class="privacy-note">
+          <span class="lang-en">By signing in, you agree to MTS Privacy Policy and Terms of Use.</span>
+          <span class="lang-ta">உள்நுழைவதன் மூலம், MTS தனியுரிமைக் கொள்கையை ஏற்கிறீர்கள்.</span>
+        </p>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // ── Aurora background animation ──────────────────────────────────
+    (function() {
+      const canvas = document.getElementById('aurora-canvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, t = 0;
+
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const waves = [
+        { color: [0, 180, 255], amp: 0.18, freq: 0.7, speed: 0.4, phase: 0 },
+        { color: [100, 40, 220], amp: 0.14, freq: 0.5, speed: 0.3, phase: 2 },
+        { color: [0, 100, 200], amp: 0.12, freq: 0.9, speed: 0.5, phase: 4 },
+        { color: [60, 20, 160], amp: 0.10, freq: 0.4, speed: 0.25, phase: 1 },
+      ];
+
+      function drawAurora() {
+        ctx.clearRect(0, 0, W, H);
+        waves.forEach(w => {
+          const y = H * 0.5;
+          const amp = H * w.amp;
+          ctx.beginPath();
+          for (let x = 0; x <= W; x += 2) {
+            const yOff = amp * Math.sin((x * w.freq / W) * Math.PI * 2 + t * w.speed + w.phase)
+                        + amp * 0.4 * Math.sin((x * w.freq * 2.1 / W) * Math.PI * 2 + t * w.speed * 1.3 + w.phase * 0.7);
+            if (x === 0) ctx.moveTo(x, y + yOff);
+            else ctx.lineTo(x, y + yOff);
+          }
+          ctx.lineTo(W, 0); ctx.lineTo(0, 0); ctx.closePath();
+          const grad = ctx.createLinearGradient(0, 0, 0, H);
+          grad.addColorStop(0, `rgba(${w.color.join(',')}, 0.08)`);
+          grad.addColorStop(0.5, `rgba(${w.color.join(',')}, 0.04)`);
+          grad.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = grad;
+          ctx.fill();
+        });
+        t += 0.008;
+        requestAnimationFrame(drawAurora);
+      }
+      drawAurora();
+    })();
+
+    // ── Floating particles ────────────────────────────────────────────
+    (function() {
+      const container = document.getElementById('particles-container');
+      const colors = ['#00d4ff', '#7c3aed', '#a855f7', '#00aaff'];
+      for (let i = 0; i < 28; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.cssText = `
+          left: ${Math.random() * 100}%;
+          width: ${Math.random() * 2 + 1}px;
+          height: ${Math.random() * 2 + 1}px;
+          background: ${colors[Math.floor(Math.random() * colors.length)]};
+          animation-duration: ${Math.random() * 12 + 10}s;
+          animation-delay: ${Math.random() * 12}s;
+          opacity: 0;
+        `;
+        container.appendChild(p);
+      }
+    })();
+
+    // ── Counter animations ────────────────────────────────────────────
+    function animateCounter(el, target, duration) {
+      let start = 0;
+      const step = target / (duration / 16);
+      const timer = setInterval(() => {
+        start = Math.min(start + step, target);
+        el.textContent = Math.floor(start);
+        if (start >= target) clearInterval(timer);
+      }, 16);
+    }
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        animateCounter(document.getElementById('counter-students'), 68, 1200);
+        animateCounter(document.getElementById('counter-teachers'), 22, 1000);
+        animateCounter(document.getElementById('counter-families'), 112, 1400);
+        animateCounter(document.getElementById('counter-uptime'), 99, 1600);
+      }, 400);
+    });
+
+    // ── Global state (must be window-scoped for onsubmit HTML attribute) ──
+    window.currentRole = 'parent';
+    window.currentLanguage = localStorage.getItem('mts-lang') || 'en';
+
+    // ── Login routing ──────────────────────────────────────────────────
+    window.handleLoginSubmit = function(e) {
+      e.preventDefault();
+      const routes = {
+        parent: 'parent-dashboard.html',
+        teacher: 'teacher-dashboard.html',
+        admin: 'admin-dashboard.html',
+      };
+      window.location.href = routes[window.currentRole];
+    };
+
+    // ── Password toggle ───────────────────────────────────────────────
+    window.togglePasswordVisibility = function() {
+      const inp = document.getElementById('login-password');
+      const ico = document.getElementById('password-toggle-icon');
+      const isHidden = inp.type === 'password';
+      inp.type = isHidden ? 'text' : 'password';
+      ico.setAttribute('data-lucide', isHidden ? 'eye-off' : 'eye');
+      lucide.createIcons();
+    };
+
+    // ── Auto-fill & go ────────────────────────────────────────────────
+    window.autoFill = function(role, email, password) {
+      const tab = document.querySelector('.role-tab[data-role="' + role + '"]');
+      if (tab) tab.click();
+      document.getElementById('login-email').value = email;
+      document.getElementById('login-password').value = password;
+
+      const btn = document.getElementById('signin-btn');
+      btn.style.opacity = '0.6';
+      btn.style.transform = 'scale(0.98)';
+      setTimeout(function() {
+        btn.style.opacity = '1';
+        btn.style.transform = '';
+        // Direct navigation — bypass all form event issues
+        const routes = { parent: 'parent-dashboard.html', teacher: 'teacher-dashboard.html', admin: 'admin-dashboard.html' };
+        window.location.href = routes[window.currentRole];
+      }, 380);
+    };
+
+    // ── Language ──────────────────────────────────────────────────────
+    window.applyLanguage = function(lang) {
+      if (lang === 'ta') {
+        document.body.classList.add('lang-tamil');
+        document.querySelectorAll('.lang-btn-text').forEach(function(el) { el.textContent = 'English'; });
+      } else {
+        document.body.classList.remove('lang-tamil');
+        document.querySelectorAll('.lang-btn-text').forEach(function(el) { el.textContent = 'தமிழ்'; });
+      }
+    };
+    window.toggleLanguage = function() {
+      window.currentLanguage = window.currentLanguage === 'en' ? 'ta' : 'en';
+      localStorage.setItem('mts-lang', window.currentLanguage);
+      window.applyLanguage(window.currentLanguage);
+    };
+    window.applyLanguage(window.currentLanguage);
+
+    // ── DOM-ready setup ───────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+      // Lucide icons
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+
+      // Role tab clicks
+      var tabs = document.querySelectorAll('#login-role-tabs .role-tab');
+      tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          tabs.forEach(function(t) { t.classList.remove('active'); });
+          tab.classList.add('active');
+          window.currentRole = tab.dataset.role;
+
+          var iconEl = document.getElementById('role-indicator-icon');
+          var textEnEl = document.getElementById('role-indicator-text');
+          var textTaEl = document.getElementById('role-indicator-text-ta');
+
+          var roleMap = {
+            parent:  { icon: 'users',          en: 'Parent Sign In',  ta: 'பெற்றோர் உள்நுழைவு' },
+            teacher: { icon: 'graduation-cap', en: 'Teacher Sign In', ta: 'ஆசிரியர் உள்நுழைவு' },
+            admin:   { icon: 'shield',         en: 'Admin Sign In',   ta: 'நிர்வாகி உள்நுழைவு' },
+          };
+          var m = roleMap[window.currentRole];
+          if (iconEl) { iconEl.setAttribute('data-lucide', m.icon); }
+          if (textEnEl) { textEnEl.textContent = m.en; }
+          if (textTaEl) { textTaEl.textContent = m.ta; }
+          if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+      });
+
+      // Form submit listener (backup to onsubmit attribute)
+      var form = document.getElementById('login-form');
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var routes = { parent: 'parent-dashboard.html', teacher: 'teacher-dashboard.html', admin: 'admin-dashboard.html' };
+          window.location.href = routes[window.currentRole];
+        });
+      }
+
+      // Counter animations
+      setTimeout(function() {
+        function animateCounter(el, target, duration) {
+          if (!el) return;
+          var start = 0;
+          var step = target / (duration / 16);
+          var timer = setInterval(function() {
+            start = Math.min(start + step, target);
+            el.textContent = Math.floor(start);
+            if (start >= target) clearInterval(timer);
+          }, 16);
+        }
+        animateCounter(document.getElementById('counter-students'), 68, 1200);
+        animateCounter(document.getElementById('counter-teachers'), 22, 1000);
+        animateCounter(document.getElementById('counter-families'), 112, 1400);
+        animateCounter(document.getElementById('counter-uptime'), 99, 1600);
+      }, 400);
+    });
+  </script>
+</body>
+</html>

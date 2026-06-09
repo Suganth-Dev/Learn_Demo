@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MTS Connect - Admin Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .rsvp-details-row {
+      display: none;
+      background-color: var(--bg-light);
+    }
+    .rsvp-details-row.open {
+      display: table-row;
+    }
+    .details-box {
+      padding: 16px;
+      border-radius: 8px;
+      background-color: var(--white);
+      border: 1px solid var(--border-color);
+    }
+    .pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      font-size: 13.5px;
+      color: var(--text-secondary);
+    }
+    .pagination-btns {
+      display: flex;
+      gap: 6px;
+    }
+    .pag-btn {
+      padding: 6px 12px;
+      border: 1px solid var(--border-color);
+      background-color: var(--white);
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .pag-btn:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+    .pag-btn.active {
+      background-color: var(--primary-navy);
+      color: var(--white);
+      border-color: var(--primary-navy);
+    }
+    .slideover-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .slideover-tab-btn {
+      background: none;
+      border: none;
+      padding: 8px 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+    }
+    .slideover-tab-btn.active {
+      color: var(--accent-cyan);
+      border-bottom-color: var(--accent-cyan);
+    }
+    .slideover-tab-panel {
+      display: none;
+      font-size: 14px;
+    }
+    .slideover-tab-panel.active {
+      display: block;
+    }
+    .student-pic-placeholder {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background-color: var(--accent-cyan-light);
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+      border: 2px solid var(--accent-cyan);
+    }
+    .import-wizard-container {
+      background-color: var(--white);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 32px;
+    }
+    .wizard-panel {
+      display: none;
+    }
+    .wizard-panel.active {
+      display: block;
+    }
+    .mapping-select {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 13.5px;
+      background-color: var(--white);
+      width: 100%;
+    }
+    .mapping-select.review {
+      border-color: var(--warning-amber);
+      background-color: var(--warning-amber-light);
+    }
+    .phone-mockup {
+      width: 250px;
+      height: 380px;
+      border: 8px solid #1e293b;
+      border-radius: 24px;
+      background-color: #0f172a;
+      padding: 12px;
+      position: relative;
+      margin: 0 auto;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 8px;
+    }
+    .phone-speaker {
+      width: 50px;
+      height: 5px;
+      background-color: #475569;
+      border-radius: 3px;
+      position: absolute;
+      top: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .phone-screen {
+      background-color: #334155;
+      flex-grow: 1;
+      border-radius: 16px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      position: relative;
+    }
+    .phone-push-notification {
+      background-color: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      padding: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      gap: 8px;
+    }
+    .push-app-logo {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      background-color: var(--primary-navy);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 9px;
+    }
+    .push-content {
+      flex-grow: 1;
+    }
+    .push-title {
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--primary-navy);
+      margin-bottom: 2px;
+    }
+    .push-desc {
+      font-size: 10px;
+      color: var(--text-dark);
+      line-height: 1.2;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container" style="display: block;">
+    <!-- Shared Sidebar (Admin View) -->
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-brand">
+          <div class="sidebar-logo">த</div>
+          <div class="brand-text">MTS <span>Connect</span></div>
+        </div>
+        <ul class="sidebar-menu">
+          <li class="sidebar-item active">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="home"></i>
+              <span class="lang-en">Dashboard</span>
+              <span class="lang-ta">கட்டுப்பாட்டகம்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="users"></i>
+              <span class="lang-en">People</span>
+              <span class="lang-ta">நபர்கள்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="book-open"></i>
+              <span class="lang-en">Academic Setup</span>
+              <span class="lang-ta">கல்வி அமைப்பு</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="clipboard-list"></i>
+              <span class="lang-en">Rosters</span>
+              <span class="lang-ta">மாணவர் பட்டியல்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="file-input"></i>
+              <span class="lang-en">Import / ITA Data</span>
+              <span class="lang-ta">தரவு இறக்குமதி</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="calendar-check"></i>
+              <span class="lang-en">Attendance Reports</span>
+              <span class="lang-ta">வருகை அறிக்கைகள்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="file-spreadsheet"></i>
+              <span class="lang-en">Homework Reports</span>
+              <span class="lang-ta">வீட்டுப்பாட அறிக்கைகள்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="megaphone"></i>
+              <span class="lang-en">Communications</span>
+              <span class="lang-ta">தொடர்புகள்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="calendar"></i>
+              <span class="lang-en">Events</span>
+              <span class="lang-ta">நிகழ்வுகள்</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="download"></i>
+              <span class="lang-en">Reports & Exports</span>
+              <span class="lang-ta">ஏற்றுமதி</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="shield-alert"></i>
+              <span class="lang-en">Audit Log</span>
+              <span class="lang-ta">தணிக்கை பதிவு</span>
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#" class="sidebar-link">
+              <i data-lucide="settings"></i>
+              <span class="lang-en">Settings</span>
+              <span class="lang-ta">அமைப்புகள்</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- User Info Card -->
+      <div class="sidebar-user">
+        <div class="user-card">
+          <div class="user-avatar">SV</div>
+          <div class="user-info">
+            <div class="user-name">Suresh V.</div>
+            <div class="user-role-badge">Super Admin</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Panel -->
+    <main class="main-content">
+      <!-- Navbar -->
+      <nav class="navbar">
+        <div class="navbar-left">
+          <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="navbar-title">
+            <span class="lang-en">Admin Dashboard</span>
+            <span class="lang-ta">நிர்வாக பலகை</span>
+          </div>
+        </div>
+
+        <div class="navbar-right">
+          <button class="nav-icon-btn" id="notification-bell-btn">
+            <i data-lucide="bell"></i>
+            <span class="badge-count">3</span>
+          </button>
+
+          <button class="lang-btn">
+            <i data-lucide="globe"></i>
+            <span class="lang-btn-text">தமிழ்</span>
+          </button>
+
+          <div class="profile-menu">
+            <button class="profile-trigger">
+              <div class="profile-avatar">SV</div>
+              <i data-lucide="chevron-down" style="width: 16px; height: 16px; color: var(--text-secondary);"></i>
+            </button>
+            <div class="profile-dropdown">
+              <a href="#" class="dropdown-item" onclick="document.querySelector('[data-lucide=settings]').parentElement.click()">
+                <i data-lucide="user" style="width:16px; height:16px;"></i> Profile
+              </a>
+              <a href="#" class="dropdown-item" onclick="document.querySelector('[data-lucide=settings]').parentElement.click()">
+                <i data-lucide="settings" style="width:16px; height:16px;"></i> Settings
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="index.html" class="dropdown-item">
+                <i data-lucide="log-out" style="width:16px; height:16px;"></i> Sign Out
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Page Content -->
+      <div class="page-container">
+        <!-- Breadcrumbs -->
+        <div class="breadcrumb">
+          <span>MTS Connect</span>
+          <span class="breadcrumb-separator">&gt;</span>
+          <span>Admin Portal</span>
+          <span class="breadcrumb-separator">&gt;</span>
+          <span id="admin-breadcrumb-active-text">Roster & Linkage Control Console</span>
+        </div>
+
+        <!-- -------------------- Panel 1: Home Dashboard -------------------- -->
+        <div class="content-panel active" id="panel-home">
+          <!-- KPI Stats -->
+          <div class="kpi-container">
+            <div class="kpi-card cyan">
+              <div class="kpi-info">
+                <h3>Total Students</h3>
+                <span class="kpi-number" id="kpi-students-count">68</span>
+                <span class="kpi-sub">AY 2025-26 Active</span>
+              </div>
+              <div class="kpi-icon"><i data-lucide="graduation-cap"></i></div>
+            </div>
+            <div class="kpi-card green">
+              <div class="kpi-info">
+                <h3>Teachers Directory</h3>
+                <span class="kpi-number" id="kpi-teachers-count">22</span>
+                <span class="kpi-sub">6 pending approvals</span>
+              </div>
+              <div class="kpi-icon"><i data-lucide="users"></i></div>
+            </div>
+            <div class="kpi-card amber">
+              <div class="kpi-info">
+                <h3>Parents Linked</h3>
+                <span class="kpi-number" id="kpi-parents-count">112</span>
+                <span class="kpi-sub">Bilingual preferences</span>
+              </div>
+              <div class="kpi-icon"><i data-lucide="home"></i></div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-info">
+                <h3>School Attendance</h3>
+                <span class="kpi-number">87%</span>
+                <span class="kpi-sub">Average school wide</span>
+              </div>
+              <div class="kpi-icon"><i data-lucide="calendar"></i></div>
+            </div>
+          </div>
+
+          <!-- Pending Approvals + Status updates -->
+          <div class="grid-2-1">
+            <!-- Table approvals -->
+            <div class="card">
+              <div class="card-title-group">
+                <div class="card-title">
+                  <i data-lucide="clipboard-list"></i>
+                  <span>Pending Linkages & Registrations (5 Urgent)</span>
+                </div>
+              </div>
+              
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Request Category</th>
+                      <th>Registrant / Parent</th>
+                      <th>Requested Details</th>
+                      <th>Date</th>
+                      <th style="text-align:right;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-approvals-tbody">
+                    <!-- Loaded dynamically in app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:24px;">
+              <!-- Quick School Status update -->
+              <div class="card">
+                <div class="card-title-group">
+                  <span class="card-title"><i data-lucide="activity"></i> School Status Control</span>
+                </div>
+                <form onsubmit="handleStatusCardSubmit(event)" style="display:flex; flex-direction:column; gap:12px;">
+                  <div class="form-group">
+                    <label class="form-label">Active Status</label>
+                    <div style="display:flex; gap:12px;">
+                      <label class="radio-label"><input type="radio" name="school-status" value="green" checked> Green</label>
+                      <label class="radio-label"><input type="radio" name="school-status" value="amber"> Amber</label>
+                      <label class="radio-label"><input type="radio" name="school-status" value="red"> Red</label>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="stat-venue">Campus Venue</label>
+                    <input type="text" class="form-input" id="stat-venue" value="MTS Building A">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="stat-parking">Parking Info</label>
+                    <input type="text" class="form-input" id="stat-parking" value="Main Lot Open">
+                  </div>
+                  <button type="submit" class="btn btn-cyan btn-sm">Update Campus Status</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 2: People directory (Students + Teachers) -------------------- -->
+        <div class="content-panel" id="panel-people">
+          <div class="tabs-container">
+            <button class="tab-btn active" id="people-tab-students" onclick="switchPeopleSubtab('students')">Students Directory</button>
+            <button class="tab-btn" id="people-tab-teachers" onclick="switchPeopleSubtab('teachers')">Teacher Directory</button>
+          </div>
+
+          <!-- Students panel subtab -->
+          <div class="tab-panel active" id="subpanel-people-students" style="margin-top:16px;">
+            <div class="card" style="padding:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; gap:8px;">
+                  <input type="text" class="form-input" id="student-search-input" placeholder="Search student names..." oninput="filterAdminStudentsRoster()" style="width:250px;">
+                  <select class="form-input" id="student-grade-filter" onchange="filterAdminStudentsRoster()" style="width:120px;">
+                    <option value="all">All Grades</option>
+                    <option value="3">Grade 3</option>
+                    <option value="4">Grade 4</option>
+                    <option value="5">Grade 5</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="openModal('add-student-modal')">+ Add Student</button>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:16px;">
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Student Name (Tamil)</th>
+                      <th>Grade</th>
+                      <th>Section</th>
+                      <th>ITA ID</th>
+                      <th>Linked Guardian</th>
+                      <th>Status</th>
+                      <th style="text-align:right;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-people-students-tbody">
+                    <!-- Populated dynamically in app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Teachers panel subtab -->
+          <div class="tab-panel" id="subpanel-people-teachers" style="margin-top:16px; display:none;">
+            <div class="card">
+              <div class="card-title-group" style="border:none; padding:0; margin-bottom:12px;">
+                <h3 style="font-weight:700; color:var(--primary-navy);">Teacher Accounts Directory</h3>
+              </div>
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Initials</th>
+                      <th>Teacher Name</th>
+                      <th>Role Profile</th>
+                      <th>Assigned Classes</th>
+                      <th>Status</th>
+                      <th style="text-align:right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-people-teachers-tbody">
+                    <!-- Seeded in app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 3: Academic Setup -------------------- -->
+        <div class="content-panel" id="panel-setup">
+          <div class="grid-2">
+            <!-- Years list -->
+            <div class="card">
+              <div class="card-title-group">
+                <span class="card-title">Academic Calendar Terms</span>
+                <button class="btn btn-primary btn-sm" onclick="alert('Form to register new academic year term initialized.')">New Term</button>
+              </div>
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Academic Year</th>
+                      <th>Active Dates</th>
+                      <th>Status Badge</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>AY 2025&ndash;2026</strong></td>
+                      <td>Aug 2025 - May 2026</td>
+                      <td><span class="badge badge-green">Active Term</span></td>
+                    </tr>
+                    <tr>
+                      <td>AY 2024&ndash;2025</td>
+                      <td>Aug 2024 - May 2025</td>
+                      <td><span class="badge badge-grey">Archived Term</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Grades list -->
+            <div class="card">
+              <div class="card-title-group">
+                <span class="card-title">Roster Grade Levels</span>
+              </div>
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Grade Level</th>
+                      <th>Tamil Label Name</th>
+                      <th>Associated Section Classes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Grade 1</td>
+                      <td class="tamil-font">முதலாம் வகுப்பு</td>
+                      <td>1-A</td>
+                    </tr>
+                    <tr>
+                      <td>Grade 2</td>
+                      <td class="tamil-font">இரண்டாம் வகுப்பு</td>
+                      <td>2-A</td>
+                    </tr>
+                    <tr>
+                      <td>Grade 3</td>
+                      <td class="tamil-font">மூன்றாம் வகுப்பு</td>
+                      <td>3-A</td>
+                    </tr>
+                    <tr>
+                      <td>Grade 4</td>
+                      <td class="tamil-font">நான்காம் வகுப்பு</td>
+                      <td>4-B</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 4: Rosters -------------------- -->
+        <div class="content-panel" id="panel-rosters">
+          <div class="card">
+            <div class="card-title-group">
+              <div class="card-title">
+                <i data-lucide="book-open"></i>
+                <span>School Rosters and Classes Assignment Setup</span>
+              </div>
+            </div>
+            <div class="card-content">
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Class Code</th>
+                      <th>Assigned Teacher</th>
+                      <th>Total Students</th>
+                      <th>Last Attendance</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-roster-list-tbody">
+                    <!-- Populated dynamically in app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 5: Import csv wizard -------------------- -->
+        <div class="content-panel" id="panel-import">
+          <div class="import-wizard-container">
+            <div class="wizard-steps">
+              <div class="wizard-step active" id="ws-1"><div class="wizard-step-circle">1</div><span class="wizard-step-label">Upload File</span></div>
+              <div class="wizard-step" id="ws-2"><div class="wizard-step-circle">2</div><span class="wizard-step-label">Map Fields</span></div>
+              <div class="wizard-step" id="ws-3"><div class="wizard-step-circle">3</div><span class="wizard-step-label">Validate Preview</span></div>
+              <div class="wizard-step" id="ws-4"><div class="wizard-step-circle">4</div><span class="wizard-step-label">Commit Import</span></div>
+            </div>
+
+            <hr style="border:none; border-top:1px solid var(--border-color); margin: 24px 0;">
+
+            <!-- STEP 1 PANEL -->
+            <div class="wizard-panel active" id="wp-1">
+              <h3 style="font-weight:700; color:var(--primary-navy); margin-bottom:12px;">📥 Upload ITA Student Database CSV</h3>
+              <div class="upload-zone" onclick="simulateAdminCsvUpload()" style="border: 2px dashed var(--accent-cyan); padding:40px; border-radius:12px; text-align:center; cursor:pointer; background-color:var(--accent-cyan-light);">
+                <div class="upload-icon" style="margin-bottom:12px;"><i data-lucide="file-spreadsheet" style="width:40px; height:40px; color:var(--accent-cyan)"></i></div>
+                <h4 style="font-weight:700; color:var(--primary-navy);">Click to select files or drag-and-drop CSV here</h4>
+                <p style="font-size:12.5px; color:var(--text-secondary); margin-top:4px;">Roster CSV spreadsheet templates can be uploaded.</p>
+                <div id="admin-file-upload-status" style="font-weight:600; color:var(--success-green); display:none; margin-top:12px;">
+                  &check; Selected File: ita_june_roster.csv (1.2MB)
+                </div>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:24px;">
+                <button class="btn btn-secondary btn-sm" onclick="alert('Downloading standard template column formatting CSV...')">Download Format Template</button>
+                <button class="btn btn-primary btn-sm" id="admin-btn-next-1" disabled onclick="goToAdminImportStep(2)">Next: Map Columns &rarr;</button>
+              </div>
+            </div>
+
+            <!-- STEP 2 PANEL -->
+            <div class="wizard-panel" id="wp-2">
+              <h3 style="font-weight:700; color:var(--primary-navy); margin-bottom:12px;">Map Column Fields</h3>
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>CSV File Headers</th>
+                      <th>MTS Database Fields</th>
+                      <th>Auto-Match Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>student_name</td><td>Student Full Name</td><td><span class="badge badge-green">&check; matched</span></td></tr>
+                    <tr><td>ita_id</td><td>ITA ID</td><td><span class="badge badge-green">&check; matched</span></td></tr>
+                    <tr><td>grade</td><td>Grade</td><td><span class="badge badge-green">&check; matched</span></td></tr>
+                    <tr><td>parent_email</td><td>Guardian Email</td><td><span class="badge badge-amber">&#9888; verify</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:24px;">
+                <button class="btn btn-secondary btn-sm" onclick="goToAdminImportStep(1)">&larr; Back</button>
+                <button class="btn btn-primary btn-sm" onclick="goToAdminImportStep(3)">Next: Validate &rarr;</button>
+              </div>
+            </div>
+
+            <!-- STEP 3 PANEL -->
+            <div class="wizard-panel" id="wp-3">
+              <h3 style="font-weight:700; color:var(--primary-navy); margin-bottom:12px;">Roster Verification Preview</h3>
+              <div style="background-color: var(--success-green-light); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; padding:12px; margin-bottom:16px;">
+                <span style="font-weight:600; color:#065f46;">Roster report: 3 new student records parsed. 0 errors detected.</span>
+              </div>
+              <div class="table-container">
+                <table class="table" style="font-size:12.5px;">
+                  <thead>
+                    <tr><th>Row</th><th>ITA ID</th><th>Student Name</th><th>Grade</th><th>Guardian</th><th>Email</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>1</td><td>ITA-2601</td><td>Arun Balakrishnan</td><td>Grade 3</td><td>Deepa Balakrishnan</td><td>deepa@mts.edu</td></tr>
+                    <tr><td>2</td><td>ITA-2602</td><td>Siddharth Nair</td><td>Grade 4</td><td>Padma Subramaniam</td><td>padma@mts.edu</td></tr>
+                    <tr><td>3</td><td>ITA-2603</td><td>Arun Govindasamy</td><td>Grade 2</td><td>Rajesh Govindasamy</td><td>rajesh@mts.edu</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:24px;">
+                <button class="btn btn-secondary btn-sm" onclick="goToAdminImportStep(2)">&larr; Back</button>
+                <button class="btn btn-primary btn-sm" onclick="goToAdminImportStep(4)">Next: Confirm &rarr;</button>
+              </div>
+            </div>
+
+            <!-- STEP 4 PANEL -->
+            <div class="wizard-panel" id="wp-4">
+              <h3 style="font-weight:700; color:var(--primary-navy); margin-bottom:12px;">Confirm Database Commit</h3>
+              <p style="font-size:14px; margin-bottom:16px;">
+                Confirming will append 3 new students to the active directories and create linked profile linkages.
+              </p>
+              <div class="form-group" style="margin-bottom:20px;">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="admin-import-confirm-chk" onchange="toggleAdminCommitButton()">
+                  <strong>I authorize committing this import file batch to the database.</strong>
+                </label>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <button class="btn btn-secondary btn-sm" onclick="goToAdminImportStep(3)">&larr; Back</button>
+                <button class="btn btn-primary btn-sm" id="admin-commit-import-btn" disabled onclick="executeAdminRosterCommit()">✅ Commit Import</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 6: Attendance Reports -------------------- -->
+        <div class="content-panel" id="panel-attendance-reports">
+          <div class="card">
+            <div class="card-title-group">
+              <div class="card-title">
+                <i data-lucide="bar-chart-2"></i>
+                <span>School-wide Attendance Reports Ratios</span>
+              </div>
+            </div>
+            <div class="card-content">
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Class Code</th>
+                      <th>Teacher Assigned</th>
+                      <th>Total Sessions</th>
+                      <th>Average Attendance Rate</th>
+                      <th>Unexcused Absences Count</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Grade 1-A</td><td>Mrs. Meena K.</td><td>12 Sessions</td><td><strong>94%</strong></td><td>1 Student</td></tr>
+                    <tr><td>Grade 2-A</td><td>Mr. Arun P.</td><td>12 Sessions</td><td><strong>95%</strong></td><td>0 Students</td></tr>
+                    <tr><td>Grade 3-A</td><td>Mrs. Lakshmi R.</td><td>12 Sessions</td><td><strong>87%</strong></td><td>2 Students</td></tr>
+                    <tr><td>Grade 4-B</td><td>Mrs. Lakshmi R.</td><td>11 Sessions</td><td><strong>73%</strong></td><td>3 Students</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 7: Homework Reports -------------------- -->
+        <div class="content-panel" id="panel-homework-reports">
+          <div class="card">
+            <div class="card-title-group">
+              <div class="card-title">
+                <i data-lucide="file-spreadsheet"></i>
+                <span>Consolidated Homework Progress Metrics</span>
+              </div>
+            </div>
+            <div class="card-content">
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Assignment Title</th>
+                      <th>Target Roster</th>
+                      <th>Submissions Rate</th>
+                      <th>Evaluations Complete</th>
+                      <th>Overdue Count</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Tamil Alphabets Practice</td><td>Grade 3-A</td><td>12 / 18 (66%)</td><td><span class="badge badge-green">10 Approved</span></td><td>4 students</td></tr>
+                    <tr><td>Thirukkural memorization</td><td>Grade 3-A</td><td>18 / 18 (100%)</td><td><span class="badge badge-green">18 Approved</span></td><td>0 students</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 8: Communications Broadcast -------------------- -->
+        <div class="content-panel" id="panel-communications">
+          <div class="grid-2-1">
+            <!-- Composer -->
+            <div class="card">
+              <div class="card-title-group">
+                <span class="card-title"><i data-lucide="megaphone"></i> Compose Broadcast Announcement</span>
+              </div>
+              <form onsubmit="handlePublishAnnouncement(event)" style="display:flex; flex-direction:column; gap:12px;">
+                <div class="form-group">
+                  <label class="form-label">Priority Label</label>
+                  <div style="display:flex; gap:12px;">
+                    <label class="radio-label"><input type="radio" name="priority" value="urgent" checked onchange="updateAdminLivePreview()"> Urgent</label>
+                    <label class="radio-label"><input type="radio" name="priority" value="important" onchange="updateAdminLivePreview()"> Important</label>
+                    <label class="radio-label"><input type="radio" name="priority" value="info" onchange="updateAdminLivePreview()"> Info</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="comp-title-en">Title (English)</label>
+                  <input type="text" class="form-input" id="comp-title-en" required value="Annual Day Venue Change" oninput="updateAdminLivePreview()">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="comp-title-ta">Title (Tamil)</label>
+                  <input type="text" class="form-input tamil-font" id="comp-title-ta" value="ஆண்டு விழா நடைபெறும் இடம் மாற்றம்" oninput="updateAdminLivePreview()">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="comp-body-en">Body Text Content (English)</label>
+                  <textarea class="form-input" id="comp-body-en" rows="3" oninput="updateAdminLivePreview()">Dear Parents, please note that Annual Day has been moved to Building B due to maintenance work in Building A. Timings remain same.</textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="comp-body-ta">Body Text Content (Tamil)</label>
+                  <textarea class="form-input tamil-font" id="comp-body-ta" rows="2" oninput="updateAdminLivePreview()">அன்பான பெற்றோர்களே, கட்டடம் A பராமரிப்பு பணி காரணமாக ஆண்டு விழா கட்டடம் B-க்கு மாற்றப்பட்டுள்ளது.</textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="comp-audience">Audience group</label>
+                  <select class="form-input" id="comp-audience">
+                    <option value="all">All Parents & Teachers</option>
+                    <option value="parents">All Parents</option>
+                  </select>
+                </div>
+                <div style="display:flex; gap:12px;">
+                  <label class="checkbox-label"><input type="checkbox" id="comp-ack" checked> Require Ack</label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Publish Broadcast Announcement</button>
+              </form>
+            </div>
+
+            <!-- Preview frame -->
+            <div style="display:flex; flex-direction:column; gap:20px;">
+              <div class="card" style="padding:12px;">
+                <span style="font-size:12px; font-weight:700; color:var(--text-secondary); display:block; text-align:center; margin-bottom:8px;">📱 Push Notification</span>
+                <div class="phone-mockup">
+                  <div class="phone-speaker"></div>
+                  <div class="phone-screen">
+                    <div class="phone-push-notification">
+                      <div class="push-app-logo">த</div>
+                      <div class="push-content">
+                        <span class="push-title" id="p-push-title">MTS Connect (Urgent)</span>
+                        <p class="push-desc" id="p-push-body">Annual Day Venue Change: Dear Parents, please note that Annual Day has been moved to Building B...</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 9: Events Manager -------------------- -->
+        <div class="content-panel" id="panel-calendar">
+          <div class="card">
+            <div class="card-title-group">
+              <div class="card-title">
+                <i data-lucide="calendar"></i>
+                <span>Marietta School Event Timeline Schedule</span>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openModal('create-event-modal')">+ Create Event</button>
+            </div>
+
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width:40px;"></th>
+                    <th>Event Title</th>
+                    <th>Event Date</th>
+                    <th>Category Type</th>
+                    <th>Target Audience</th>
+                    <th>Seats Capacity</th>
+                    <th>RSVP counts</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-events-list-tbody">
+                  <!-- Dynamically populated in app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 10: Reports & Exports -------------------- -->
+        <div class="content-panel" id="panel-reports">
+          <div class="card">
+            <div class="card-title-group">
+              <div class="card-title">
+                <i data-lucide="download"></i>
+                <span>School Report Generators & PDF Exporter Console</span>
+              </div>
+            </div>
+            <div class="card-content">
+              <p style="font-size:14px; color:var(--text-secondary); margin-bottom:8px;">
+                Choose database collections to extract records as formatted CSV spreadsheets or PDF templates.
+              </p>
+              
+              <div class="grid-3">
+                <div class="card" style="text-align:center; padding:20px;">
+                  <h4 style="font-weight:700;">Student Roster CSV</h4>
+                  <p style="font-size:12.5px; color:var(--text-secondary);">Downloads all 68 active student directory fields.</p>
+                  <button class="btn btn-primary btn-sm" style="margin-top:12px; width:100%;" onclick="alert('Exporting student_roster_data.csv file...')">Export CSV</button>
+                </div>
+                <div class="card" style="text-align:center; padding:20px;">
+                  <h4 style="font-weight:700;">School Audit Log PDF</h4>
+                  <p style="font-size:12.5px; color:var(--text-secondary);">Generates security trails logs document report.</p>
+                  <button class="btn btn-primary btn-sm" style="margin-top:12px; width:100%;" onclick="alert('Exporting system_audit_reports.pdf file...')">Export PDF</button>
+                </div>
+                <div class="card" style="text-align:center; padding:20px;">
+                  <h4 style="font-weight:700;">Grade Attendance Rates</h4>
+                  <p style="font-size:12.5px; color:var(--text-secondary);">Downloads terms summary matrices records.</p>
+                  <button class="btn btn-primary btn-sm" style="margin-top:12px; width:100%;" onclick="alert('Exporting attendance_rates_june.csv file...')">Export CSV</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 11: Settings Control -------------------- -->
+        <div class="content-panel" id="panel-settings">
+          <div class="grid-2">
+            <!-- School Profile details -->
+            <div class="card">
+              <div class="card-title-group">
+                <div class="card-title">Marietta Campus Identity Settings</div>
+              </div>
+              <form onsubmit="event.preventDefault(); alert('Global school profile parameters saved.');" style="display:flex; flex-direction:column; gap:12px;">
+                <div class="form-group">
+                  <label class="form-label">School Name</label>
+                  <input type="text" class="form-input" value="Marietta Tamil School" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">School Location Address</label>
+                  <input type="text" class="form-input" value="MTS Building A, 123 School Dr, Marietta GA" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">System Timezone</label>
+                  <input type="text" class="form-input" value="America/New_York (EST)" readonly>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" style="width:fit-content;">Save Profile Changes</button>
+              </form>
+            </div>
+
+            <!-- Active Sessions manager -->
+            <div class="card">
+              <div class="card-title-group">
+                <span class="card-title">Active Admin Login Sessions</span>
+              </div>
+              <div class="table-container">
+                <table class="table" style="font-size:12.5px;">
+                  <thead>
+                    <tr>
+                      <th>Device Details</th>
+                      <th>IP Address</th>
+                      <th>Last Active</th>
+                      <th style="text-align:right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-sessions-list-tbody">
+                    <!-- Seeded in app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- -------------------- Panel 12: Audit Log Trails -------------------- -->
+        <div class="content-panel" id="panel-audit">
+          <div class="card">
+            <div class="card-title-group">
+              <span class="card-title">System Modifications & Audit Trail Logs</span>
+            </div>
+            <div class="table-container">
+              <table class="table" style="font-size:13px;">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Target Roster</th>
+                    <th>Modification details</th>
+                    <th>IP Location</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-audit-logs-tbody">
+                  <!-- Populated dynamically in app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Student details modal -->
+  <div class="modal-overlay" id="profile-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <span style="font-size:11px; text-transform:uppercase; opacity:0.8;">Student Profile Detail</span>
+          <h3 style="font-size: 18px; font-weight:800; margin-top:2px;" id="so-student-name">Anika Kumar</h3>
+        </div>
+        <button class="modal-close" onclick="closeSlideover()">&times;</button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+        <div style="display:flex; align-items:center; gap:16px; border-bottom: 1px solid var(--border-color); padding-bottom:16px;">
+          <div class="student-pic-placeholder" id="so-avatar-letters">AK</div>
+          <div>
+            <h4 style="font-weight:700; color:var(--primary-navy); font-size:15px;" id="so-detail-name">Anika Kumar</h4>
+            <p style="font-size:12.5px; color:var(--text-secondary);">
+              Grade Section: <span id="so-detail-grade">3-A</span> &bull; ID: <span id="so-detail-id">MTS-001</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="slideover-tabs">
+          <button class="slideover-tab-btn active" data-stab="so-profile-tab" onclick="switchStudentProfileTab('so-profile-tab')">Profile Info</button>
+          <button class="slideover-tab-btn" data-stab="so-guardian-tab" onclick="switchStudentProfileTab('so-guardian-tab')">Guardian</button>
+        </div>
+
+        <div class="slideover-tab-panel active" id="so-profile-tab">
+          <div style="display:flex; flex-direction:column; gap:10px; font-size:13.5px;">
+            <div><strong>Tamil Name:</strong> <span id="so-tamil-name">அனிகா</span></div>
+            <div><strong>ITA ID:</strong> <span id="so-ita-id">ITA-2301</span></div>
+            <div><strong>Date of Birth:</strong> <span id="so-dob">2017-01-14</span></div>
+            <div><strong>Enroll Date:</strong> <span id="so-enroll-date">2024-08-15</span></div>
+            <div class="form-group" style="margin-top:8px;">
+              <label class="form-label" for="so-local-notes">Internal local Notes:</label>
+              <textarea class="form-input" id="so-local-notes" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="slideover-tab-panel" id="so-guardian-tab">
+          <div style="background-color: var(--bg-light); border-radius: 8px; padding: 14px; border:1px solid var(--border-color); font-size:13px;">
+            <h5 style="font-weight:700; margin-bottom:6px;" id="so-guardian-name">Priya Kumar</h5>
+            <p id="so-guardian-details">Guardian Roster Details linked</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" onclick="closeSlideover()">Close</button>
+        <button class="btn btn-primary btn-sm" onclick="saveInternalStudentNotes()">Save Profile Notes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Student Modal -->
+  <div class="modal-overlay" id="add-student-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Add Student to Campus Directory</h3>
+        <button class="modal-close" onclick="closeModal('add-student-modal')">&times;</button>
+      </div>
+      <form onsubmit="handleAdminAddStudentSubmit(event)">
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="form-group">
+            <label class="form-label" for="as-name">Full Name</label>
+            <input type="text" class="form-input" id="as-name" required placeholder="e.g. Rohini Kumar">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="as-tamil-name">Tamil Script Name</label>
+            <input type="text" class="form-input tamil-font" id="as-tamil-name" placeholder="எ.கா. ரோகிணி">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label class="form-label" for="as-grade">Grade Level</label>
+              <select class="form-input" id="as-grade">
+                <option value="1">Grade 1</option>
+                <option value="2">Grade 2</option>
+                <option value="3" selected>Grade 3</option>
+                <option value="4">Grade 4</option>
+                <option value="5">Grade 5</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="as-section">Class Section</label>
+              <select class="form-input" id="as-section">
+                <option>3-A</option>
+                <option>4-B</option>
+                <option>5-A</option>
+                <option>2-A</option>
+                <option>1-A</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label class="form-label" for="as-ita-id">ITA Student ID</label>
+              <input type="text" class="form-input" id="as-ita-id" required value="ITA-2605">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="as-guardian">Linked Guardian Parent</label>
+              <input type="text" class="form-input" id="as-guardian" required value="Priya Kumar">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('add-student-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Add Student Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Create Event Modal -->
+  <div class="modal-overlay" id="create-event-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Schedule New Event</h3>
+        <button class="modal-close" onclick="closeModal('create-event-modal')">&times;</button>
+      </div>
+      <form onsubmit="handleCreateEventSubmit(event)">
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="form-group">
+            <label class="form-label" for="ev-name">Event Name Title</label>
+            <input type="text" class="form-input" id="ev-name" required placeholder="e.g. Summer Quiz Contest">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label class="form-label" for="ev-date">Scheduled Date</label>
+              <input type="date" class="form-input" id="ev-date" required value="2025-06-28">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ev-type">Event Type Category</label>
+              <select class="form-input" id="ev-type">
+                <option>Competition</option>
+                <option>Rehearsal</option>
+                <option>Academic</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label class="form-label" for="ev-capacity">Guest Capacity Limit</label>
+              <input type="number" class="form-input" id="ev-capacity" required value="100">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ev-audience">Target Audience</label>
+              <select class="form-input" id="ev-audience">
+                <option>All Grades</option>
+                <option>Grade 3-A & 4-B Students</option>
+                <option>All Grade Parents</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('create-event-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Schedule Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
