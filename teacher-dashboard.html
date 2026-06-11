@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MTS Connect - Teacher Dashboard</title>
-  
+  <script>
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      if (theme === 'dark') document.documentElement.classList.add('dark-mode');
+    })();
+  </script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+Tamil:wght@300;400;500;600;700&display=swap');
 
@@ -14,6 +19,7 @@
   --accent-cyan: #0EA5E9;
   --accent-cyan-light: rgba(14, 165, 233, 0.08);
   --bg-light: #F8FAFC;
+  --surface: #FFFFFF;
   --white: #FFFFFF;
   --success-green: #10B981;
   --success-green-light: rgba(16, 185, 129, 0.08);
@@ -30,6 +36,45 @@
   --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
   --font-family: 'Outfit', 'Noto Sans Tamil', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --sidebar-width: 240px;
+}
+
+html.dark-mode {
+  --primary-navy: #0ea5e9;
+  --primary-navy-light: #162a45;
+  --accent-cyan: #00d4ff;
+  --accent-cyan-light: rgba(0, 212, 255, 0.08);
+  --bg-light: #050d1a;
+  --surface: #0b1329;
+  --white: #ffffff;
+  --text-dark: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: rgba(0, 212, 255, 0.15);
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Specific Dark Mode overrides for layout components */
+html.dark-mode .sidebar {
+  background-color: #0b1329 !important; /* Keep sidebar dark blue */
+  border-right: 1px solid rgba(0, 212, 255, 0.15);
+}
+html.dark-mode .sidebar-item.active .sidebar-link {
+  color: #f8fafc !important; /* Keep active sidebar link white */
+}
+html.dark-mode .sidebar-logo {
+  background-color: #162a45 !important;
+  color: #00d4ff !important;
+}
+html.dark-mode .nav-icon-btn:hover {
+  color: #00d4ff !important;
+}
+html.dark-mode .btn-secondary {
+  background-color: #0b1329 !important;
+  color: #f8fafc !important;
+  border-color: rgba(0, 212, 255, 0.15) !important;
+}
+html.dark-mode .btn-secondary:hover {
+  background-color: #162a45 !important;
 }
 
 /* Reset and Base Styles */
@@ -115,7 +160,7 @@ i[data-lucide] {
 .sidebar-logo {
   width: 38px;
   height: 38px;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -249,7 +294,7 @@ i[data-lucide] {
 /* Top Navbar Styles */
 .navbar {
   height: 64px;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-bottom: 1px solid var(--border-color);
   padding: 0 32px;
   display: flex;
@@ -330,7 +375,7 @@ i[data-lucide] {
   padding: 6px 12px;
   border-radius: 6px;
   border: 1px solid var(--border-color);
-  background-color: var(--white);
+  background-color: var(--surface);
   color: var(--text-dark);
   cursor: pointer;
   transition: all 0.2s;
@@ -376,7 +421,7 @@ i[data-lucide] {
   top: 48px;
   right: 0;
   width: 200px;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 8px;
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border-color);
@@ -483,7 +528,7 @@ i[data-lucide] {
   padding: 6px 12px;
   border-radius: 6px;
   border: 1px solid var(--accent-cyan);
-  background-color: var(--white);
+  background-color: var(--surface);
   color: var(--primary-navy);
   font-weight: 600;
   cursor: pointer;
@@ -510,7 +555,7 @@ i[data-lucide] {
 
 /* Cards */
 .card {
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 8px;
   border: 1px solid rgba(15, 23, 42, 0.06);
   box-shadow: var(--shadow);
@@ -581,7 +626,7 @@ i[data-lucide] {
 }
 
 .btn-secondary {
-  background-color: var(--white);
+  background-color: var(--surface);
   color: var(--primary-navy);
   border-color: var(--border-color);
 }
@@ -678,7 +723,7 @@ i[data-lucide] {
   border-collapse: collapse;
   text-align: left;
   font-size: 14px;
-  background-color: var(--white);
+  background-color: var(--surface);
 }
 
 .table th {
@@ -711,7 +756,7 @@ i[data-lucide] {
 }
 
 .kpi-card {
-  background-color: var(--white);
+  background-color: var(--surface);
   padding: 20px;
   border-radius: 12px;
   box-shadow: var(--shadow);
@@ -829,7 +874,7 @@ i[data-lucide] {
   position: absolute;
   width: 60px;
   height: 60px;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -923,7 +968,7 @@ i[data-lucide] {
   right: -400px;
   width: 380px;
   height: 100vh;
-  background-color: var(--white);
+  background-color: var(--surface);
   box-shadow: -4px 0 25px rgba(0,0,0,0.15);
   z-index: 210;
   display: flex;
@@ -1072,7 +1117,7 @@ i[data-lucide] {
 }
 
 .modal {
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 12px;
   box-shadow: var(--shadow-lg);
   width: 100%;
@@ -1143,7 +1188,7 @@ i[data-lucide] {
   display: grid;
   grid-template-columns: 320px 1fr;
   height: calc(100vh - 128px);
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 12px;
   box-shadow: var(--shadow);
   overflow: hidden;
@@ -1261,7 +1306,7 @@ i[data-lucide] {
 
 .chat-header {
   padding: 16px 24px;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -1304,7 +1349,7 @@ i[data-lucide] {
 }
 
 .chat-bubble-received {
-  background-color: var(--white);
+  background-color: var(--surface);
   color: var(--text-dark);
   align-self: flex-start;
   border-top-left-radius: 2px;
@@ -1334,7 +1379,7 @@ i[data-lucide] {
 
 .chat-input-bar {
   padding: 16px 24px;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-top: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -1366,7 +1411,7 @@ i[data-lucide] {
   justify-content: center;
   padding: 48px;
   text-align: center;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 12px;
   border: 2px dashed var(--border-color);
 }
@@ -1410,7 +1455,7 @@ i[data-lucide] {
 }
 
 .calendar-cell {
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 8px;
   aspect-ratio: 1.2;
   padding: 8px;
@@ -1509,7 +1554,7 @@ i[data-lucide] {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: var(--white);
+  background-color: var(--surface);
   border: 4px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -1607,7 +1652,17 @@ i[data-lucide] {
   border-radius: 6px;
   border: 1px solid var(--border-color);
   font-size: 14.5px;
-  background-color: var(--white);
+  background-color: var(--surface);
+  color: var(--text-dark);
+}
+
+.form-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.form-input option {
+  background-color: var(--surface);
+  color: var(--text-dark);
 }
 
 .form-input:focus {
@@ -1666,7 +1721,7 @@ i[data-lucide] {
   right: -550px;
   width: 500px;
   height: 100vh;
-  background-color: var(--white);
+  background-color: var(--surface);
   box-shadow: -4px 0 25px rgba(0,0,0,0.15);
   z-index: 260;
   display: flex;
@@ -1779,7 +1834,7 @@ i[data-lucide] {
       margin-bottom: 8px;
     }
     .action-btn-card {
-      background-color: var(--white);
+      background-color: var(--surface);
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 16px 20px;
@@ -1863,7 +1918,7 @@ i[data-lucide] {
       accent-color: var(--primary-navy);
     }
     .attendance-summary-bar {
-      background-color: var(--white);
+      background-color: var(--surface);
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow-lg);
       padding: 16px 24px;
@@ -1986,6 +2041,12 @@ i[data-lucide] {
             <span class="badge-count">3</span>
           </button>
 
+          <!-- Theme toggle -->
+          <button class="theme-btn nav-icon-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
+            <i data-lucide="moon" class="theme-icon-moon"></i>
+            <i data-lucide="sun" class="theme-icon-sun" style="display:none;"></i>
+          </button>
+
           <button class="lang-btn">
             <i data-lucide="globe"></i>
             <span class="lang-btn-text">தமிழ்</span>
@@ -2026,7 +2087,7 @@ i[data-lucide] {
         <!-- -------------------- Panel 1: Home Dashboard -------------------- -->
         <div class="content-panel active" id="panel-home">
           <!-- Welcome banner -->
-          <div style="background-color: var(--white); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between;">
+          <div style="background-color: var(--surface); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between;">
             <div>
               <h2 style="font-size: 22px; font-weight: 800; color: var(--primary-navy);">
                 <span class="lang-en">Good Evening, Mrs. Lakshmi 👋</span>

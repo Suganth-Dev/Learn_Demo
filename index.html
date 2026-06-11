@@ -11,6 +11,23 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
+      --navy: #f0f4f8; /* Light background */
+      --navy2: #ffffff; /* Login panel background */
+      --cyan: #0ea5e9;
+      --cyan2: #0284c7;
+      --violet: #6366f1;
+      --violet2: #4f46e5;
+      --gold: #f59e0b;
+      --white: #0f172a; /* Main text color */
+      --glass: rgba(0,0,0,0.03);
+      --glass-border: rgba(0,0,0,0.1);
+      --text-muted: rgba(15,23,42,0.6);
+      --true-white: #ffffff; /* Keep white for buttons etc */
+      --input-bg: rgba(0,0,0,0.03);
+      --panel-glow: transparent;
+    }
+
+    html.dark-mode {
       --navy: #050d1a;
       --navy2: #0a1628;
       --cyan: #00d4ff;
@@ -22,6 +39,9 @@
       --glass: rgba(255,255,255,0.04);
       --glass-border: rgba(255,255,255,0.10);
       --text-muted: rgba(255,255,255,0.45);
+      --true-white: #ffffff;
+      --input-bg: rgba(255,255,255,0.05);
+      --panel-glow: linear-gradient(to bottom, transparent, var(--cyan), transparent);
     }
 
     html, body {
@@ -118,7 +138,7 @@
       background: linear-gradient(135deg, var(--cyan) 0%, var(--violet) 100%);
       border-radius: 14px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 28px; font-weight: 900; color: white;
+      font-size: 28px; font-weight: 900; color: var(--true-white);
       box-shadow: 0 0 30px rgba(0,212,255,0.4), 0 0 0 1px rgba(0,212,255,0.3);
       position: relative;
       flex-shrink: 0;
@@ -174,7 +194,7 @@
       letter-spacing: -2px;
       margin-bottom: 20px;
     }
-    .hero-heading .line1 { display: block; color: white; }
+    .hero-heading .line1 { display: block; color: var(--white); }
     .hero-heading .line2 {
       display: block;
       background: linear-gradient(90deg, var(--cyan) 0%, var(--violet2) 60%, var(--gold) 100%);
@@ -182,7 +202,7 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    .hero-heading .line3 { display: block; color: rgba(255,255,255,0.7); font-weight: 400; font-size: 0.62em; letter-spacing: -0.5px; margin-top: 8px; }
+    .hero-heading .line3 { display: block; color: var(--text-muted); font-weight: 400; font-size: 0.62em; letter-spacing: -0.5px; margin-top: 8px; }
 
     .tamil-text {
       font-family: 'Noto Sans Tamil', sans-serif;
@@ -210,7 +230,7 @@
     }
     .stat-divider {
       width: 1px;
-      background: rgba(255,255,255,0.1);
+      background: var(--glass-border);
       align-self: stretch;
     }
 
@@ -225,7 +245,7 @@
       border-radius: 999px;
       padding: 7px 14px;
       font-size: 12.5px; font-weight: 600;
-      color: rgba(255,255,255,0.75);
+      color: var(--text-muted);
       transition: all 0.3s;
       backdrop-filter: blur(10px);
     }
@@ -243,8 +263,8 @@
     }
     .left-bottom-info { font-size: 12px; color: var(--text-muted); }
     .version-pill {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
       padding: 4px 12px; border-radius: 999px;
       font-size: 11px; font-weight: 700; color: var(--text-muted);
       letter-spacing: 1px;
@@ -257,9 +277,9 @@
       justify-content: flex-start;
       padding: 32px 32px 32px 48px;
       position: relative;
-      background: rgba(5, 15, 30, 0.5);
+      background: var(--navy2);
       backdrop-filter: blur(24px);
-      border-left: 1px solid rgba(255,255,255,0.07);
+      border-left: 1px solid var(--glass-border);
     }
 
     /* Subtle vertical glow line on divider */
@@ -268,7 +288,7 @@
       position: absolute;
       left: -1px; top: 10%; bottom: 10%;
       width: 1px;
-      background: linear-gradient(to bottom, transparent, var(--cyan), transparent);
+      background: var(--panel-glow);
       opacity: 0.4;
     }
 
@@ -302,8 +322,8 @@
     /* Role tabs */
     .role-tabs {
       display: grid; grid-template-columns: repeat(3, 1fr);
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
       border-radius: 10px;
       padding: 4px;
       gap: 4px;
@@ -321,7 +341,7 @@
       font-family: 'Outfit', sans-serif;
     }
     .role-tab i { width: 15px; height: 15px; }
-    .role-tab:hover { color: rgba(255,255,255,0.8); }
+    .role-tab:hover { color: var(--white); }
     .role-tab.active {
       background: linear-gradient(135deg, rgba(0,212,255,0.15) 0%, rgba(124,58,237,0.15) 100%);
       color: var(--white);
@@ -345,14 +365,14 @@
     }
     .form-label {
       font-size: 12.5px; font-weight: 600;
-      color: rgba(255,255,255,0.6);
+      color: var(--text-muted);
       letter-spacing: 0.3px;
     }
     .form-input-wrapper { position: relative; }
     .form-input {
       width: 100%;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.12);
+      background: var(--input-bg);
+      border: 1px solid var(--glass-border);
       border-radius: 8px;
       padding: 12px 16px;
       font-size: 14px;
@@ -361,7 +381,7 @@
       transition: all 0.25s;
       outline: none;
     }
-    .form-input::placeholder { color: rgba(255,255,255,0.2); }
+    .form-input::placeholder { color: var(--text-muted); }
     .form-input:focus {
       border-color: var(--cyan);
       background: rgba(0,212,255,0.05);
@@ -370,7 +390,7 @@
     .pw-toggle {
       position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
       background: none; border: none; cursor: pointer;
-      color: rgba(255,255,255,0.35); transition: color 0.2s;
+      color: var(--text-muted); transition: color 0.2s;
       display: flex;
     }
     .pw-toggle:hover { color: var(--cyan); }
@@ -383,7 +403,7 @@
     }
     .checkbox-label {
       display: flex; align-items: center; gap: 8px;
-      cursor: pointer; color: rgba(255,255,255,0.5); font-weight: 500;
+      cursor: pointer; color: var(--text-muted); font-weight: 500;
     }
     .checkbox-label input { accent-color: var(--cyan); width: 14px; height: 14px; }
     .forgot-link {
@@ -400,7 +420,7 @@
       background: linear-gradient(135deg, #00c6f0 0%, #006ee6 100%);
       border: none; border-radius: 10px;
       font-size: 15px; font-weight: 700;
-      color: var(--white); cursor: pointer;
+      color: var(--true-white); cursor: pointer;
       font-family: 'Outfit', sans-serif;
       letter-spacing: 0.2px;
       position: relative; overflow: hidden;
@@ -421,36 +441,36 @@
     /* Divider */
     .divider {
       display: flex; align-items: center; gap: 12px;
-      margin: 16px 0; color: rgba(255,255,255,0.2); font-size: 11.5px; font-weight: 600;
+      margin: 16px 0; color: var(--text-muted); font-size: 11.5px; font-weight: 600;
       text-transform: uppercase; letter-spacing: 1.5px;
     }
     .divider::before, .divider::after {
-      content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1);
+      content: ''; flex: 1; height: 1px; background: var(--glass-border);
     }
 
     /* Create account */
     .btn-outline {
       width: 100%;
       padding: 12px 20px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.12);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
       border-radius: 10px;
       font-size: 14px; font-weight: 600;
-      color: rgba(255,255,255,0.7); cursor: pointer;
+      color: var(--text-muted); cursor: pointer;
       font-family: 'Outfit', sans-serif;
       transition: all 0.25s;
       margin-bottom: 20px;
     }
     .btn-outline:hover {
-      border-color: rgba(255,255,255,0.25);
-      color: white;
-      background: rgba(255,255,255,0.07);
+      border-color: var(--glass-border);
+      color: var(--white);
+      background: var(--glass);
     }
 
     /* Demo credentials */
     .demo-card {
-      background: rgba(0,212,255,0.04);
-      border: 1px solid rgba(0,212,255,0.15);
+      background: rgba(14, 165, 233, 0.04);
+      border: 1px solid rgba(14, 165, 233, 0.15);
       border-radius: 12px;
       padding: 16px;
       margin-top: 4px;
@@ -458,7 +478,7 @@
     .demo-card-title {
       display: flex; align-items: center; gap: 8px;
       font-size: 12px; font-weight: 700;
-      color: rgba(255,255,255,0.6);
+      color: var(--text-muted);
       text-transform: uppercase; letter-spacing: 1px;
       margin-bottom: 12px;
     }
@@ -466,8 +486,8 @@
 
     .demo-btn {
       width: 100%;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
       border-radius: 8px;
       padding: 9px 12px;
       display: flex; align-items: center; justify-content: space-between;
@@ -490,14 +510,14 @@
     .demo-role-icon.parent { background: rgba(16,185,129,0.15); }
     .demo-role-icon.teacher { background: rgba(59,130,246,0.15); }
     .demo-role-icon.admin { background: rgba(245,158,11,0.15); }
-    .demo-role-name { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); }
-    .demo-email { font-size: 11px; font-family: monospace; color: rgba(255,255,255,0.35); margin-top: 1px; }
-    .demo-arrow { color: rgba(255,255,255,0.2); transition: color 0.2s; }
+    .demo-role-name { font-size: 13px; font-weight: 700; color: var(--white); }
+    .demo-email { font-size: 11px; font-family: monospace; color: var(--text-muted); margin-top: 1px; }
+    .demo-arrow { color: var(--text-muted); transition: color 0.2s; }
     .demo-btn:hover .demo-arrow { color: var(--cyan); }
 
     /* Privacy note */
     .privacy-note {
-      text-align: center; font-size: 11px; color: rgba(255,255,255,0.2);
+      text-align: center; font-size: 11px; color: var(--text-muted);
       margin-top: 14px; line-height: 1.5;
     }
 
@@ -522,19 +542,40 @@
     body.lang-tamil .lang-en { display: none !important; }
     body:not(.lang-tamil) .lang-ta { display: none !important; }
 
+    .top-right-controls {
+      position: fixed;
+      top: 24px;
+      right: 36px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
     .lang-toggle {
-      position: fixed; top: 24px; right: 36px; z-index: 100;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
       border-radius: 8px;
       padding: 7px 14px;
-      font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.7);
+      font-size: 13px; font-weight: 600; color: var(--text-muted);
       cursor: pointer;
       display: flex; align-items: center; gap: 7px;
       font-family: 'Outfit', 'Noto Sans Tamil', sans-serif;
       transition: all 0.2s;
     }
     .lang-toggle:hover { border-color: rgba(0,212,255,0.3); color: var(--cyan); }
+
+    .theme-toggle {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 13px; font-weight: 600; color: var(--text-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .theme-toggle:hover { border-color: rgba(0,212,255,0.3); color: var(--cyan); }
 
     /* ─── RESPONSIVE ─── */
     @media (max-width: 1100px) {
@@ -560,11 +601,18 @@
   <!-- Aurora canvas -->
   <canvas id="aurora-canvas"></canvas>
 
-  <!-- Language toggle -->
-  <button class="lang-toggle lang-btn" onclick="toggleLanguage()">
-    <i data-lucide="globe" style="width:14px;height:14px;"></i>
-    <span class="lang-btn-text">தமிழ்</span>
-  </button>
+  <!-- Top Right Controls (Theme & Language) -->
+  <div class="top-right-controls">
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+      <i data-lucide="moon" class="theme-icon-moon" style="width:14px;height:14px;"></i>
+      <i data-lucide="sun" class="theme-icon-sun" style="width:14px;height:14px;display:none;"></i>
+    </button>
+
+    <button class="lang-toggle lang-btn" onclick="toggleLanguage()">
+      <i data-lucide="globe" style="width:14px;height:14px;"></i>
+      <span class="lang-btn-text">தமிழ்</span>
+    </button>
+  </div>
 
   <div class="page-layout">
     <!-- ══════════════════ LEFT PANEL ══════════════════ -->
@@ -886,6 +934,7 @@
     // ── Global state (must be window-scoped for onsubmit HTML attribute) ──
     window.currentRole = 'parent';
     window.currentLanguage = localStorage.getItem('mts-lang') || 'en';
+    window.currentTheme = localStorage.getItem('theme') || 'light';
 
     // ── Login routing ──────────────────────────────────────────────────
     window.handleLoginSubmit = function(e) {
@@ -943,6 +992,28 @@
       window.applyLanguage(window.currentLanguage);
     };
     window.applyLanguage(window.currentLanguage);
+
+    window.applyTheme = function(theme) {
+      const moonIcons = document.querySelectorAll('.theme-icon-moon');
+      const sunIcons = document.querySelectorAll('.theme-icon-sun');
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+        document.body.classList.add('dark-mode');
+        moonIcons.forEach(function(i) { i.style.display = 'none'; });
+        sunIcons.forEach(function(i) { i.style.display = ''; });
+      } else {
+        document.documentElement.classList.remove('dark-mode');
+        document.body.classList.remove('dark-mode');
+        moonIcons.forEach(function(i) { i.style.display = ''; });
+        sunIcons.forEach(function(i) { i.style.display = 'none'; });
+      }
+    };
+    window.toggleTheme = function() {
+      window.currentTheme = window.currentTheme === 'light' ? 'dark' : 'light';
+      localStorage.setItem('theme', window.currentTheme);
+      window.applyTheme(window.currentTheme);
+    };
+    window.applyTheme(window.currentTheme);
 
     // ── DOM-ready setup ───────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function() {

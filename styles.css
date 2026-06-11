@@ -24,6 +24,44 @@
   --sidebar-width: 240px;
 }
 
+html.dark-mode {
+  --primary-navy: #0ea5e9;
+  --primary-navy-light: #162a45;
+  --accent-cyan: #00d4ff;
+  --accent-cyan-light: rgba(0, 212, 255, 0.08);
+  --bg-light: #050d1a;
+  --white: #0b1329;
+  --text-dark: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: rgba(0, 212, 255, 0.15);
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Specific Dark Mode overrides for layout components */
+html.dark-mode .sidebar {
+  background-color: #0b1329 !important; /* Keep sidebar dark blue */
+  border-right: 1px solid rgba(0, 212, 255, 0.15);
+}
+html.dark-mode .sidebar-item.active .sidebar-link {
+  color: #f8fafc !important; /* Keep active sidebar link white */
+}
+html.dark-mode .sidebar-logo {
+  background-color: #162a45 !important;
+  color: #00d4ff !important;
+}
+html.dark-mode .nav-icon-btn:hover {
+  color: #00d4ff !important;
+}
+html.dark-mode .btn-secondary {
+  background-color: #0b1329 !important;
+  color: #f8fafc !important;
+  border-color: rgba(0, 212, 255, 0.15) !important;
+}
+html.dark-mode .btn-secondary:hover {
+  background-color: #162a45 !important;
+}
+
 /* Reset and Base Styles */
 * {
   box-sizing: border-box;
@@ -1599,7 +1637,17 @@ i[data-lucide] {
   border-radius: 6px;
   border: 1px solid var(--border-color);
   font-size: 14.5px;
-  background-color: var(--white);
+  background-color: var(--surface);
+  color: var(--text-dark);
+}
+
+.form-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.form-input option {
+  background-color: var(--surface);
+  color: var(--text-dark);
 }
 
 .form-input:focus {

@@ -24,7 +24,7 @@ const InitialSeedData = {
   ],
   students: [
     { id: 'MTS-001', name: 'Anika Kumar', tamilName: 'அனிகா', grade: '3', section: '3-A', itaId: 'ITA-2301', guardian: 'Priya Kumar', status: 'Active', dob: '2017-01-14', enrollDate: '2024-08-15', phone: '404-555-0245', notes: 'Scholarship student. Prefers English notifications.' },
-    { id: 'MTS-002', name: 'Rohan Sharma', tamilName: 'ரோஹன்', grade: '3', section: '3-A', itaId: 'ITA-2302', guardian: 'Anand Sharma', status: 'Active', dob: '2017-04-22', enrollDate: '2024-08-15', phone: '404-555-0122', notes: 'No special accommodations.' },
+    { id: 'MTS-002', name: 'Rohan Kumar', tamilName: 'ரோஹன்', grade: '2', section: '2-A', itaId: 'ITA-2302', guardian: 'Priya Kumar', status: 'Active', dob: '2017-04-22', enrollDate: '2024-08-15', phone: '404-555-0245', notes: 'No special accommodations.' },
     { id: 'MTS-003', name: 'Diya Patel', tamilName: 'தியா', grade: '4', section: '4-B', itaId: 'ITA-2401', guardian: 'Meena Patel', status: 'Active', dob: '2016-09-08', enrollDate: '2024-08-15', phone: '404-555-0311', notes: 'Speaks Tamil at home.' },
     { id: 'MTS-004', name: 'Siddharth Nair', tamilName: 'சித்தார்த்', grade: '4', section: '4-B', itaId: 'ITA-2402', guardian: 'Padma Subramaniam', status: 'Pending', dob: '2016-11-30', enrollDate: '2025-01-10', phone: '404-555-0761', notes: 'ITA mismatch flags on review.' },
     { id: 'MTS-005', name: 'Kavya Rajan', tamilName: 'காவ்யா', grade: '5', section: '5-A', itaId: 'ITA-2501', guardian: 'Suma Rajan', status: 'Active', dob: '2015-05-18', enrollDate: '2024-08-15', phone: '404-555-0441', notes: 'Sibling in Grade 2.' }
@@ -109,7 +109,7 @@ const InitialSeedData = {
 
 // Database Initialization (Local Storage CRUD Layer)
 // Version key - increment to force seed data reset
-const DB_VERSION = 'mts_v5';
+const DB_VERSION = 'mts_v6';
 
 function initializeDatabase() {
   const storedVersion = localStorage.getItem('mts_db_version');
@@ -165,6 +165,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Always run first — ensures seed data is guaranteed present
   initializeDatabase();
   applyLanguage(currentLanguage);
+  
+  // Initialize theme
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  applyTheme(currentTheme);
 
   // Set up language toggle clicks
   document.querySelectorAll('.lang-btn').forEach(btn => {
@@ -287,6 +291,30 @@ function applyLanguage(lang) {
   }
 }
 
+// Dynamic Theme Toggler
+window.toggleTheme = function() {
+  const theme = localStorage.getItem('theme') || 'light';
+  const newTheme = theme === 'light' ? 'dark' : 'light';
+  localStorage.setItem('theme', newTheme);
+  applyTheme(newTheme);
+};
+
+window.applyTheme = function(theme) {
+  const moonIcons = document.querySelectorAll('.theme-icon-moon');
+  const sunIcons = document.querySelectorAll('.theme-icon-sun');
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark-mode');
+    document.body.classList.add('dark-mode');
+    moonIcons.forEach(i => i.style.display = 'none');
+    sunIcons.forEach(i => i.style.display = '');
+  } else {
+    document.documentElement.classList.remove('dark-mode');
+    document.body.classList.remove('dark-mode');
+    moonIcons.forEach(i => i.style.display = '');
+    sunIcons.forEach(i => i.style.display = 'none');
+  }
+};
+
 // ----------------------------------------------------
 // PARENT SPA CONTROLLER & PERSISTENT CRUD
 // ----------------------------------------------------
@@ -405,7 +433,12 @@ function renderParentChildren() {
           <span style="font-size:11px; text-transform:uppercase; font-weight:700; color:var(--text-secondary);">Marietta Student</span>
           <h4 style="font-weight:800; color:var(--primary-navy); margin-top:2px;">${c.name} (${c.tamilName})</h4>
         </div>
-        <span class="badge ${c.status === 'Active' ? 'badge-green' : 'badge-amber'}">${c.status}</span>
+        <div style="display:inline-flex; gap:8px; align-items:center; justify-content:flex-end;">
+          <span class="badge ${c.status === 'Active' ? 'badge-green' : 'badge-amber'}">${c.status}</span>
+          <button class="btn btn-secondary btn-sm" onclick="viewChildDetails('${c.id}')" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center;" title="View"><i data-lucide="eye" style="width:14px; height:14px;"></i></button>
+          <button class="btn btn-secondary btn-sm" onclick="openChildForm('${c.id}')" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center;" title="Edit"><i data-lucide="edit-2" style="width:14px; height:14px;"></i></button>
+          <button class="btn btn-secondary btn-sm" onclick="deleteChildRecord('${c.id}')" style="padding:4px 8px; font-size:12px; color:var(--critical-red); border-color:rgba(239,68,68,0.2); display:inline-flex; align-items:center;" title="Delete"><i data-lucide="trash-2" style="width:14px; height:14px;"></i></button>
+        </div>
       </div>
       <div class="card-content" style="font-size:13.5px; gap:6px;">
         <div><strong>ITA ID:</strong> ${c.itaId}</div>
@@ -417,6 +450,7 @@ function renderParentChildren() {
     `;
     parentChildrenList.appendChild(card);
   });
+  if (typeof lucide !== 'undefined') lucide.createIcons({ node: parentChildrenList });
 }
 
 function renderParentAttendanceGrid() {
@@ -1426,6 +1460,7 @@ function renderAdminSPA() {
   renderAdminApprovals();
   renderAdminStudentsTable();
   renderAdminTeachersTable();
+  renderAdminParentsTable();
   renderAdminRosterList();
   renderAdminEventsList();
   renderAdminSessions();
@@ -1601,12 +1636,19 @@ window.switchPeopleSubtab = function(tabName) {
   activePeopleSubtab = tabName;
   document.getElementById('people-tab-students').className = `tab-btn ${tabName === 'students' ? 'active' : ''}`;
   document.getElementById('people-tab-teachers').className = `tab-btn ${tabName === 'teachers' ? 'active' : ''}`;
+  const parentTab = document.getElementById('people-tab-parents');
+  if (parentTab) parentTab.className = `tab-btn ${tabName === 'parents' ? 'active' : ''}`;
   
   document.getElementById('subpanel-people-students').style.display = tabName === 'students' ? 'block' : 'none';
   document.getElementById('subpanel-people-teachers').style.display = tabName === 'teachers' ? 'block' : 'none';
+  const parentSubpanel = document.getElementById('subpanel-people-parents');
+  if (parentSubpanel) parentSubpanel.style.display = tabName === 'parents' ? 'block' : 'none';
 
   renderAdminStudentsTable();
   renderAdminTeachersTable();
+  if (typeof renderAdminParentsTable === 'function') {
+    renderAdminParentsTable();
+  }
 };
 
 function renderAdminStudentsTable() {
@@ -1762,25 +1804,31 @@ function renderAdminTeachersTable() {
   if (!tbody) return;
 
   tbody.innerHTML = '';
+  const searchVal = (document.getElementById('teacher-search-input')?.value || '').toLowerCase();
+  
   db.teachers.forEach(t => {
-    const isPending = t.role.includes('Pending');
-    tbody.innerHTML += `
-      <tr>
-        <td><div class="user-avatar" style="background-color: var(--primary-navy); width:32px; height:32px; font-size:12px;">${t.initials}</div></td>
-        <td style="font-weight:700;">${t.name}</td>
-        <td>${t.role}</td>
-        <td>${t.grades}</td>
-        <td><span class="badge ${isPending ? 'badge-amber' : 'badge-green'}">${isPending ? 'Pending Approval' : 'Active'}</span></td>
-        <td style="text-align:right;">
-          ${isPending ? `
-            <button class="btn btn-primary btn-sm" style="background-color:var(--success-green);" onclick="approveTeacherAccount('${t.email}')">Approve</button>
-          ` : `
-            <button class="btn btn-secondary btn-sm" onclick="alert('Viewing profile of ${t.name}')">View Profile</button>
-          `}
-        </td>
-      </tr>
-    `;
+    const matchesSearch = t.name.toLowerCase().includes(searchVal) || t.email.toLowerCase().includes(searchVal);
+    if (matchesSearch) {
+      const isPending = t.role.includes('Pending');
+      tbody.innerHTML += `
+        <tr>
+          <td><div class="user-avatar" style="background-color: var(--primary-navy); width:32px; height:32px; font-size:12px;">${t.initials}</div></td>
+          <td style="font-weight:700;">${t.name}</td>
+          <td>${t.email}</td>
+          <td>${t.grades}</td>
+          <td><span class="badge ${isPending ? 'badge-amber' : 'badge-green'}">${isPending ? 'Pending Approval' : 'Active'}</span></td>
+          <td style="text-align:right;">
+            <div style="display:inline-flex; gap:8px; justify-content:flex-end;">
+              <button class="btn btn-secondary btn-sm" onclick="viewTeacher('${t.email}')" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center;" title="View"><i data-lucide="eye" style="width:14px; height:14px;"></i></button>
+              <button class="btn btn-secondary btn-sm" onclick="openTeacherForm('${t.email}')" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center;" title="Edit"><i data-lucide="edit-2" style="width:14px; height:14px;"></i></button>
+              <button class="btn btn-secondary btn-sm" onclick="deleteTeacherRecord('${t.email}')" style="padding:4px 8px; font-size:12px; color:var(--critical-red); border-color:rgba(239,68,68,0.2); display:inline-flex; align-items:center;" title="Delete"><i data-lucide="trash-2" style="width:14px; height:14px;"></i></button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
   });
+  if (typeof lucide !== 'undefined') lucide.createIcons({ node: tbody });
 }
 
 window.approveTeacherAccount = function(email) {
@@ -2159,6 +2207,7 @@ function injectDemoControls() {
 }
 
 // Global modal operations
+// Global modal operations
 window.openModal = function(id) {
   const modal = document.getElementById(id);
   if (modal) modal.classList.add('open');
@@ -2168,3 +2217,518 @@ window.closeModal = function(id) {
   const modal = document.getElementById(id);
   if (modal) modal.classList.remove('open');
 };
+
+// ──────────────────────────────────────────────────────────────────
+// TOAST NOTIFICATION & CONFIRM DIALOG SYSTEM
+// ──────────────────────────────────────────────────────────────────
+const TOAST_ICONS = {
+  success: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+  error:   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`,
+  info:    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
+  warning: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`
+};
+
+window.showToast = function(message, type = 'success', duration = 3500) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `
+    <span class="toast-icon">${TOAST_ICONS[type] || TOAST_ICONS.info}</span>
+    <span class="toast-msg">${message}</span>
+    <button class="toast-close" onclick="this.parentElement.remove()">&#x2715;</button>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('removing');
+    toast.addEventListener('animationend', () => toast.remove(), { once: true });
+  }, duration);
+};
+
+let _confirmResolve = null;
+window.showConfirm = function(title, message, onConfirm) {
+  const overlay = document.getElementById('toast-confirm-overlay');
+  if (!overlay) {
+    if (confirm(message)) onConfirm();
+    return;
+  }
+  document.getElementById('toast-confirm-title').textContent = title;
+  document.getElementById('toast-confirm-msg').textContent = message;
+  overlay.classList.add('open');
+  _confirmResolve = (confirmed) => {
+    overlay.classList.remove('open');
+    _confirmResolve = null;
+    if (confirmed && typeof onConfirm === 'function') onConfirm();
+  };
+};
+
+window._confirmResolve = function(confirmed) {
+  if (typeof _confirmResolve === 'function') {
+    _confirmResolve(confirmed);
+  }
+};
+
+// Derive Initials
+function getInitials(name) {
+  if (!name) return '??';
+  return name.split(' ').map(n => n[0]).join('').slice(0, 3).toUpperCase();
+}
+
+// ──────────────────────────────────────────────────────────────────
+// ADMIN TEACHER CRUD OPERATIONS
+// ──────────────────────────────────────────────────────────────────
+window.openTeacherForm = function(email = null) {
+  const db = getDb();
+  const title = document.getElementById('teacher-modal-title');
+  const formEmail = document.getElementById('tch-email');
+  if (email) {
+    const t = db.teachers.find(x => x.email === email);
+    if (!t) return;
+    title.textContent = 'Edit Teacher';
+    document.getElementById('teacher-form-original-email').value = t.email;
+    document.getElementById('tch-name').value = t.name;
+    formEmail.value = t.email;
+    formEmail.disabled = true;
+    document.getElementById('tch-grades').value = t.grades || '';
+    document.getElementById('tch-role').value = t.role || 'Teacher';
+  } else {
+    title.textContent = 'Add Teacher';
+    document.getElementById('teacher-form-original-email').value = '';
+    document.getElementById('tch-name').value = '';
+    formEmail.value = '';
+    formEmail.disabled = false;
+    document.getElementById('tch-grades').value = '';
+    document.getElementById('tch-role').value = 'Teacher';
+  }
+  openModal('add-teacher-modal');
+};
+
+window.handleAdminTeacherSubmit = function(event) {
+  event.preventDefault();
+  const db = getDb();
+  const origEmail = document.getElementById('teacher-form-original-email').value;
+  const name = document.getElementById('tch-name').value.trim();
+  const email = document.getElementById('tch-email').value.trim();
+  const grades = document.getElementById('tch-grades').value.trim();
+  const role = document.getElementById('tch-role').value;
+  
+  if (origEmail) {
+    const idx = db.teachers.findIndex(x => x.email === origEmail);
+    if (idx >= 0) {
+      db.teachers[idx].name = name;
+      db.teachers[idx].grades = grades;
+      db.teachers[idx].role = role;
+      db.teachers[idx].initials = getInitials(name);
+    }
+    db.auditLog.unshift({
+      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      user: 'admin@mts.edu',
+      action: 'Teacher Edit',
+      target: name,
+      details: `Updated teacher profile: ${email}`
+    });
+    showToast(`✏️ Teacher "${name}" updated successfully.`, 'success');
+  } else {
+    if (db.teachers.some(x => x.email.toLowerCase() === email.toLowerCase())) {
+      showToast('A teacher with this email already exists.', 'error');
+      return;
+    }
+    const newT = {
+      email,
+      name,
+      role,
+      initials: getInitials(name),
+      grades
+    };
+    db.teachers.push(newT);
+    db.auditLog.unshift({
+      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      user: 'admin@mts.edu',
+      action: 'Teacher Add',
+      target: name,
+      details: `Created new teacher profile: ${email}`
+    });
+    showToast(`✅ Teacher "${name}" added successfully.`, 'success');
+  }
+  saveDb(db);
+  closeModal('add-teacher-modal');
+  renderAdminTeachersTable();
+};
+
+window.viewTeacher = function(email) {
+  const db = getDb();
+  const t = db.teachers.find(x => x.email === email);
+  if (!t) return;
+  document.getElementById('view-tch-name').textContent = t.name;
+  document.getElementById('view-tch-role').textContent = t.role || 'Teacher Profile';
+  document.getElementById('view-tch-email').textContent = t.email;
+  document.getElementById('view-tch-grades').textContent = t.grades || 'None';
+  document.getElementById('view-tch-avatar').textContent = t.initials;
+  openModal('view-teacher-modal');
+};
+
+window.deleteTeacherRecord = function(email) {
+  const db = getDb();
+  const t = db.teachers.find(x => x.email === email);
+  if (!t) return;
+  showConfirm('Delete Teacher', `Are you sure you want to permanently remove "${t.name}"?`, () => {
+    let freshDb = getDb();
+    freshDb.teachers = freshDb.teachers.filter(x => x.email !== email);
+    freshDb.auditLog.unshift({
+      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      user: 'admin@mts.edu',
+      action: 'Teacher Delete',
+      target: t.name,
+      details: `Deleted teacher profile: ${email}`
+    });
+    saveDb(freshDb);
+    showToast(`🗑️ Teacher "${t.name}" deleted successfully.`, 'warning');
+    renderAdminTeachersTable();
+  });
+};
+
+window.filterAdminTeachersRoster = function() {
+  renderAdminTeachersTable();
+};
+
+// ──────────────────────────────────────────────────────────────────
+// ADMIN PARENT CRUD OPERATIONS
+// ──────────────────────────────────────────────────────────────────
+window.openParentForm = function(email = null) {
+  const db = getDb();
+  const title = document.getElementById('parent-modal-title');
+  const formEmail = document.getElementById('prn-email');
+  if (email) {
+    const p = db.parents.find(x => x.email === email);
+    if (!p) return;
+    title.textContent = 'Edit Parent';
+    document.getElementById('parent-form-original-email').value = p.email;
+    document.getElementById('prn-name').value = p.name;
+    formEmail.value = p.email;
+    formEmail.disabled = true;
+    document.getElementById('prn-phone').value = p.phone || '';
+    document.getElementById('prn-children').value = (p.children || []).join(', ');
+  } else {
+    title.textContent = 'Add Parent';
+    document.getElementById('parent-form-original-email').value = '';
+    document.getElementById('prn-name').value = '';
+    formEmail.value = '';
+    formEmail.disabled = false;
+    document.getElementById('prn-phone').value = '';
+    document.getElementById('prn-children').value = '';
+  }
+  openModal('add-parent-modal');
+};
+
+window.handleAdminParentSubmit = function(event) {
+  event.preventDefault();
+  const db = getDb();
+  const origEmail = document.getElementById('parent-form-original-email').value;
+  const name = document.getElementById('prn-name').value.trim();
+  const email = document.getElementById('prn-email').value.trim();
+  const phone = document.getElementById('prn-phone').value.trim();
+  const kidsStr = document.getElementById('prn-children').value.trim();
+  const children = kidsStr ? kidsStr.split(',').map(x => x.trim()).filter(Boolean) : [];
+
+  if (origEmail) {
+    const idx = db.parents.findIndex(x => x.email === origEmail);
+    if (idx >= 0) {
+      db.parents[idx].name = name;
+      db.parents[idx].phone = phone;
+      db.parents[idx].children = children;
+      db.parents[idx].initials = getInitials(name);
+    }
+    db.auditLog.unshift({
+      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      user: 'admin@mts.edu',
+      action: 'Parent Edit',
+      target: name,
+      details: `Updated parent profile: ${email}`
+    });
+    showToast(`✏️ Parent "${name}" updated successfully.`, 'success');
+  } else {
+    if (db.parents.some(x => x.email.toLowerCase() === email.toLowerCase())) {
+      showToast('A parent with this email already exists.', 'error');
+      return;
+    }
+    const newP = {
+      email,
+      name,
+      role: 'Parent',
+      initials: getInitials(name),
+      phone,
+      children
+    };
+    db.parents.push(newP);
+    db.auditLog.unshift({
+      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      user: 'admin@mts.edu',
+      action: 'Parent Add',
+      target: name,
+      details: `Created new parent profile: ${email}`
+    });
+    showToast(`✅ Parent "${name}" added successfully.`, 'success');
+  }
+  saveDb(db);
+  closeModal('add-parent-modal');
+  renderAdminParentsTable();
+};
+
+window.viewParent = function(email) {
+  const db = getDb();
+  const p = db.parents.find(x => x.email === email);
+  if (!p) return;
+  document.getElementById('view-prn-name').textContent = p.name;
+  document.getElementById('view-prn-email').textContent = p.email;
+  document.getElementById('view-prn-phone').textContent = p.phone || 'None';
+  document.getElementById('view-prn-children').textContent = (p.children || []).join(', ') || 'None';
+  document.getElementById('view-prn-avatar').textContent = p.initials;
+  openModal('view-parent-modal');
+};
+
+window.deleteParentRecord = function(email) {
+  const db = getDb();
+  const p = db.parents.find(x => x.email === email);
+  if (!p) return;
+  showConfirm('Delete Parent', `Are you sure you want to permanently remove "${p.name}"?`, () => {
+    let freshDb = getDb();
+    freshDb.parents = freshDb.parents.filter(x => x.email !== email);
+    freshDb.auditLog.unshift({
+      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      user: 'admin@mts.edu',
+      action: 'Parent Delete',
+      target: p.name,
+      details: `Deleted parent profile: ${email}`
+    });
+    saveDb(freshDb);
+    showToast(`🗑️ Parent "${p.name}" deleted successfully.`, 'warning');
+    renderAdminParentsTable();
+  });
+};
+
+window.filterAdminParentsRoster = function() {
+  renderAdminParentsTable();
+};
+
+window.renderAdminParentsTable = function() {
+  const db = getDb();
+  const tbody = document.getElementById('admin-people-parents-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+  const searchVal = (document.getElementById('parent-search-input')?.value || '').toLowerCase();
+  
+  db.parents.forEach(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchVal) || p.email.toLowerCase().includes(searchVal);
+    if (matchesSearch) {
+      tbody.innerHTML += `
+        <tr>
+          <td><div class="user-avatar" style="background-color: var(--accent-cyan); width:32px; height:32px; font-size:12px;">${p.initials}</div></td>
+          <td style="font-weight:700;">${p.name}</td>
+          <td>${p.email}</td>
+          <td>${p.phone || '—'}</td>
+          <td>${(p.children || []).join(', ') || '—'}</td>
+          <td style="text-align:right;">
+            <div style="display:inline-flex; gap:8px; justify-content:flex-end;">
+              <button class="btn btn-secondary btn-sm" onclick="viewParent('${p.email}')" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center;" title="View"><i data-lucide="eye" style="width:14px; height:14px;"></i></button>
+              <button class="btn btn-secondary btn-sm" onclick="openParentForm('${p.email}')" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center;" title="Edit"><i data-lucide="edit-2" style="width:14px; height:14px;"></i></button>
+              <button class="btn btn-secondary btn-sm" onclick="deleteParentRecord('${p.email}')" style="padding:4px 8px; font-size:12px; color:var(--critical-red); border-color:rgba(239,68,68,0.2); display:inline-flex; align-items:center;" title="Delete"><i data-lucide="trash-2" style="width:14px; height:14px;"></i></button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+  });
+  if (typeof lucide !== 'undefined') lucide.createIcons({ node: tbody });
+};
+
+// ──────────────────────────────────────────────────────────────────
+// PARENT CHILD CRUD OPERATIONS
+// ──────────────────────────────────────────────────────────────────
+window.openChildForm = function(studentId = null) {
+  const db = getDb();
+  const title = document.getElementById('child-modal-title');
+  if (studentId) {
+    const s = db.students.find(x => x.id === studentId);
+    if (!s) return;
+    title.textContent = 'Edit Child';
+    document.getElementById('child-form-id').value = s.id;
+    document.getElementById('ch-name').value = s.name;
+    document.getElementById('ch-tamil').value = s.tamilName || '';
+    document.getElementById('ch-grade').value = s.grade;
+    document.getElementById('ch-section').value = s.section;
+    document.getElementById('ch-ita').value = s.itaId;
+    document.getElementById('ch-dob').value = s.dob || '';
+    document.getElementById('ch-photo').value = s.photoConsent || 'Approved';
+    document.getElementById('ch-medical').value = s.medicalForm || 'Submitted';
+    document.getElementById('ch-notes').value = s.notes || '';
+  } else {
+    title.textContent = 'Add Child';
+    document.getElementById('child-form-id').value = '';
+    document.getElementById('ch-name').value = '';
+    document.getElementById('ch-tamil').value = '';
+    document.getElementById('ch-grade').value = '3';
+    document.getElementById('ch-section').value = '3-A';
+    document.getElementById('ch-ita').value = 'ITA-2605';
+    document.getElementById('ch-dob').value = '2017-05-15';
+    document.getElementById('ch-photo').value = 'Approved';
+    document.getElementById('ch-medical').value = 'Submitted';
+    document.getElementById('ch-notes').value = '';
+  }
+  openModal('add-child-modal');
+};
+
+window.handleParentChildSubmit = function(event) {
+  event.preventDefault();
+  const db = getDb();
+  const id = document.getElementById('child-form-id').value;
+  const name = document.getElementById('ch-name').value.trim();
+  const tamilName = document.getElementById('ch-tamil').value.trim();
+  const grade = document.getElementById('ch-grade').value;
+  const section = document.getElementById('ch-section').value;
+  const itaId = document.getElementById('ch-ita').value.trim();
+  const dob = document.getElementById('ch-dob').value;
+  const photo = document.getElementById('ch-photo').value;
+  const medical = document.getElementById('ch-medical').value;
+  const notes = document.getElementById('ch-notes').value.trim();
+
+  if (id) {
+    const idx = db.students.findIndex(x => x.id === id);
+    if (idx >= 0) {
+      db.students[idx].name = name;
+      db.students[idx].tamilName = tamilName;
+      db.students[idx].grade = grade;
+      db.students[idx].section = section;
+      db.students[idx].itaId = itaId;
+      db.students[idx].dob = dob;
+      db.students[idx].photoConsent = photo;
+      db.students[idx].medicalForm = medical;
+      db.students[idx].notes = notes;
+    }
+    db.auditLog.unshift({
+      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      user: 'parent@mts.edu',
+      action: 'Child Profile Edit',
+      target: name,
+      details: `Updated child details for: ${name}`
+    });
+    showToast(`✏️ Child details for "${name}" updated successfully.`, 'success');
+  } else {
+    const newId = 'MTS-' + String(db.students.length + 1).padStart(3, '0');
+    const newKid = {
+      id: newId,
+      name,
+      tamilName,
+      grade,
+      section,
+      itaId,
+      guardian: 'Priya Kumar',
+      status: 'Active',
+      dob,
+      enrollDate: new Date().toISOString().split('T')[0],
+      phone: '404-555-0245',
+      notes,
+      photoConsent: photo,
+      medicalForm: medical
+    };
+    db.students.push(newKid);
+    db.auditLog.unshift({
+      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      user: 'parent@mts.edu',
+      action: 'Child Profile Add',
+      target: name,
+      details: `Registered child to parent roster: ${name}`
+    });
+    showToast(`✅ Child "${name}" added successfully.`, 'success');
+  }
+  saveDb(db);
+  closeModal('add-child-modal');
+  renderParentChildren();
+
+  // Add kid to active child dropdown if not exists
+  const switcher = document.getElementById('child-selector-dropdown');
+  if (switcher) {
+    let exists = false;
+    for (let i = 0; i < switcher.options.length; i++) {
+      if (switcher.options[i].value === name) {
+        exists = true;
+        break;
+      }
+    }
+    if (!exists) {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      switcher.appendChild(opt);
+    }
+  }
+};
+
+window.viewChildDetails = function(studentId) {
+  const db = getDb();
+  const s = db.students.find(x => x.id === studentId);
+  if (!s) return;
+  document.getElementById('view-ch-name-header').textContent = s.name;
+  document.getElementById('view-ch-ita-header').textContent = `ID: ${s.id} | ITA ID: ${s.itaId}`;
+  document.getElementById('view-ch-tamil').textContent = s.tamilName || '—';
+  document.getElementById('view-ch-grade-sec').textContent = `Grade ${s.grade} (${s.section})`;
+  document.getElementById('view-ch-ita').textContent = s.itaId;
+  document.getElementById('view-ch-dob').textContent = s.dob || '—';
+  document.getElementById('view-ch-enroll').textContent = s.enrollDate || '—';
+  
+  const photoEl = document.getElementById('view-ch-photo');
+  photoEl.textContent = s.photoConsent || 'Not Selected';
+  photoEl.className = `badge ${s.photoConsent === 'Approved' ? 'badge-green' : s.photoConsent === 'Pending Signature' ? 'badge-amber' : 'badge-red'}`;
+  
+  const medEl = document.getElementById('view-ch-medical');
+  medEl.textContent = s.medicalForm || 'Not Selected';
+  medEl.className = `badge ${s.medicalForm === 'Submitted' ? 'badge-green' : s.medicalForm === 'Pending Attachment' ? 'badge-amber' : 'badge-red'}`;
+
+  document.getElementById('view-ch-notes').textContent = s.notes || 'No notes.';
+  document.getElementById('view-ch-avatar').textContent = s.name.split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase();
+  openModal('view-child-modal');
+};
+
+window.deleteChildRecord = function(studentId) {
+  const db = getDb();
+  const s = db.students.find(x => x.id === studentId);
+  if (!s) return;
+  
+  const seedIds = ['MTS-001', 'MTS-002', 'MTS-003', 'MTS-004', 'MTS-005'];
+  if (seedIds.includes(studentId)) {
+    showToast(`⛔ Cannot delete seed child profile "${s.name}".`, 'error');
+    return;
+  }
+  
+  showConfirm('Delete Child', `Are you sure you want to permanently remove "${s.name}"?`, () => {
+    let freshDb = getDb();
+    freshDb.students = freshDb.students.filter(x => x.id !== studentId);
+    freshDb.auditLog.unshift({
+      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      user: 'parent@mts.edu',
+      action: 'Child Profile Delete',
+      target: s.name,
+      details: `Deleted student profile: ${studentId}`
+    });
+    saveDb(freshDb);
+    showToast(`🗑️ Child "${s.name}" deleted successfully.`, 'warning');
+    renderParentChildren();
+    
+    const switcher = document.getElementById('child-selector-dropdown');
+    if (switcher) {
+      for (let i = 0; i < switcher.options.length; i++) {
+        if (switcher.options[i].value === s.name) {
+          switcher.remove(i);
+          break;
+        }
+      }
+      if (activeChild === s.name) {
+        activeChild = 'Anika Kumar';
+        switcher.value = 'Anika Kumar';
+        localStorage.setItem('mts-active-child', 'Anika Kumar');
+        updateParentChildState('Anika Kumar');
+      }
+    }
+  });
+};
+

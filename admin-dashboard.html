@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MTS Connect - Admin Dashboard</title>
-  
+  <script>
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      if (theme === 'dark') document.documentElement.classList.add('dark-mode');
+    })();
+  </script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+Tamil:wght@300;400;500;600;700&display=swap');
 
@@ -14,6 +19,7 @@
   --accent-cyan: #0EA5E9;
   --accent-cyan-light: rgba(14, 165, 233, 0.08);
   --bg-light: #F8FAFC;
+  --surface: #FFFFFF;
   --white: #FFFFFF;
   --success-green: #10B981;
   --success-green-light: rgba(16, 185, 129, 0.08);
@@ -30,6 +36,45 @@
   --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
   --font-family: 'Outfit', 'Noto Sans Tamil', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --sidebar-width: 240px;
+}
+
+html.dark-mode {
+  --primary-navy: #0ea5e9;
+  --primary-navy-light: #162a45;
+  --accent-cyan: #00d4ff;
+  --accent-cyan-light: rgba(0, 212, 255, 0.08);
+  --bg-light: #050d1a;
+  --surface: #0b1329;
+  --white: #ffffff;
+  --text-dark: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: rgba(0, 212, 255, 0.15);
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Specific Dark Mode overrides for layout components */
+html.dark-mode .sidebar {
+  background-color: #0b1329 !important; /* Keep sidebar dark blue */
+  border-right: 1px solid rgba(0, 212, 255, 0.15);
+}
+html.dark-mode .sidebar-item.active .sidebar-link {
+  color: #f8fafc !important; /* Keep active sidebar link white */
+}
+html.dark-mode .sidebar-logo {
+  background-color: #162a45 !important;
+  color: #00d4ff !important;
+}
+html.dark-mode .nav-icon-btn:hover {
+  color: #00d4ff !important;
+}
+html.dark-mode .btn-secondary {
+  background-color: #0b1329 !important;
+  color: #f8fafc !important;
+  border-color: rgba(0, 212, 255, 0.15) !important;
+}
+html.dark-mode .btn-secondary:hover {
+  background-color: #162a45 !important;
 }
 
 /* Reset and Base Styles */
@@ -115,7 +160,7 @@ i[data-lucide] {
 .sidebar-logo {
   width: 38px;
   height: 38px;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -249,7 +294,7 @@ i[data-lucide] {
 /* Top Navbar Styles */
 .navbar {
   height: 64px;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-bottom: 1px solid var(--border-color);
   padding: 0 32px;
   display: flex;
@@ -330,7 +375,7 @@ i[data-lucide] {
   padding: 6px 12px;
   border-radius: 6px;
   border: 1px solid var(--border-color);
-  background-color: var(--white);
+  background-color: var(--surface);
   color: var(--text-dark);
   cursor: pointer;
   transition: all 0.2s;
@@ -376,7 +421,7 @@ i[data-lucide] {
   top: 48px;
   right: 0;
   width: 200px;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 8px;
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border-color);
@@ -483,7 +528,7 @@ i[data-lucide] {
   padding: 6px 12px;
   border-radius: 6px;
   border: 1px solid var(--accent-cyan);
-  background-color: var(--white);
+  background-color: var(--surface);
   color: var(--primary-navy);
   font-weight: 600;
   cursor: pointer;
@@ -510,7 +555,7 @@ i[data-lucide] {
 
 /* Cards */
 .card {
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 8px;
   border: 1px solid rgba(15, 23, 42, 0.06);
   box-shadow: var(--shadow);
@@ -581,7 +626,7 @@ i[data-lucide] {
 }
 
 .btn-secondary {
-  background-color: var(--white);
+  background-color: var(--surface);
   color: var(--primary-navy);
   border-color: var(--border-color);
 }
@@ -678,7 +723,7 @@ i[data-lucide] {
   border-collapse: collapse;
   text-align: left;
   font-size: 14px;
-  background-color: var(--white);
+  background-color: var(--surface);
 }
 
 .table th {
@@ -711,7 +756,7 @@ i[data-lucide] {
 }
 
 .kpi-card {
-  background-color: var(--white);
+  background-color: var(--surface);
   padding: 20px;
   border-radius: 12px;
   box-shadow: var(--shadow);
@@ -829,7 +874,7 @@ i[data-lucide] {
   position: absolute;
   width: 60px;
   height: 60px;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -923,7 +968,7 @@ i[data-lucide] {
   right: -400px;
   width: 380px;
   height: 100vh;
-  background-color: var(--white);
+  background-color: var(--surface);
   box-shadow: -4px 0 25px rgba(0,0,0,0.15);
   z-index: 210;
   display: flex;
@@ -1072,7 +1117,7 @@ i[data-lucide] {
 }
 
 .modal {
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 12px;
   box-shadow: var(--shadow-lg);
   width: 100%;
@@ -1143,7 +1188,7 @@ i[data-lucide] {
   display: grid;
   grid-template-columns: 320px 1fr;
   height: calc(100vh - 128px);
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 12px;
   box-shadow: var(--shadow);
   overflow: hidden;
@@ -1261,7 +1306,7 @@ i[data-lucide] {
 
 .chat-header {
   padding: 16px 24px;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -1304,7 +1349,7 @@ i[data-lucide] {
 }
 
 .chat-bubble-received {
-  background-color: var(--white);
+  background-color: var(--surface);
   color: var(--text-dark);
   align-self: flex-start;
   border-top-left-radius: 2px;
@@ -1334,7 +1379,7 @@ i[data-lucide] {
 
 .chat-input-bar {
   padding: 16px 24px;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-top: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -1366,7 +1411,7 @@ i[data-lucide] {
   justify-content: center;
   padding: 48px;
   text-align: center;
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 12px;
   border: 2px dashed var(--border-color);
 }
@@ -1410,7 +1455,7 @@ i[data-lucide] {
 }
 
 .calendar-cell {
-  background-color: var(--white);
+  background-color: var(--surface);
   border-radius: 8px;
   aspect-ratio: 1.2;
   padding: 8px;
@@ -1509,7 +1554,7 @@ i[data-lucide] {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: var(--white);
+  background-color: var(--surface);
   border: 4px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -1607,7 +1652,17 @@ i[data-lucide] {
   border-radius: 6px;
   border: 1px solid var(--border-color);
   font-size: 14.5px;
-  background-color: var(--white);
+  background-color: var(--surface);
+  color: var(--text-dark);
+}
+
+.form-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.form-input option {
+  background-color: var(--surface);
+  color: var(--text-dark);
 }
 
 .form-input:focus {
@@ -1666,7 +1721,7 @@ i[data-lucide] {
   right: -550px;
   width: 500px;
   height: 100vh;
-  background-color: var(--white);
+  background-color: var(--surface);
   box-shadow: -4px 0 25px rgba(0,0,0,0.15);
   z-index: 260;
   display: flex;
@@ -1770,6 +1825,80 @@ i[data-lucide] {
   box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.4);
 }
 
+/* ── TOAST NOTIFICATION SYSTEM ── */
+#toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+  width: 320px;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
+  width: 100%;
+  animation: toastIn 0.35s cubic-bezier(0.16,1,0.3,1) forwards;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+}
+.toast.toast-success { background: linear-gradient(135deg, #10b981ee 0%, #059669ee 100%); }
+.toast.toast-error   { background: linear-gradient(135deg, #ef4444ee 0%, #dc2626ee 100%); }
+.toast.toast-info    { background: linear-gradient(135deg, #0ea5e9ee 0%, #0284c7ee 100%); }
+.toast.toast-warning { background: linear-gradient(135deg, #f59e0bee 0%, #d97706ee 100%); }
+.toast .toast-icon { width: 20px; height: 20px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+.toast .toast-icon svg { width: 100%; height: 100%; }
+.toast .toast-msg  { flex: 1; line-height: 1.35; }
+.toast .toast-close { background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; padding: 0; display: flex; font-size: 16px; }
+.toast .toast-close:hover { color: #fff; }
+@keyframes toastIn  { from { opacity:0; transform:translateY(-16px) scale(0.94); } to { opacity:1; transform:translateY(0) scale(1); } }
+@keyframes toastOut { from { opacity:1; transform:translateY(0) scale(1); }       to { opacity:0; transform:translateY(-12px) scale(0.94); } }
+.toast.removing { animation: toastOut 0.28s cubic-bezier(0.4,0,1,1) forwards; }
+
+/* ── CUSTOM CONFIRM DIALOG ── */
+#toast-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+#toast-confirm-overlay.open { display: flex; }
+#toast-confirm-box {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 24px 20px 20px;
+  width: 100%;
+  max-width: 340px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+  animation: toastIn 0.3s cubic-bezier(0.16,1,0.3,1) forwards;
+  text-align: center;
+}
+#toast-confirm-icon { width: 48px; height: 48px; border-radius: 50%; background: rgba(239,68,68,0.12); display: flex; align-items:center; justify-content:center; margin: 0 auto 16px; }
+#toast-confirm-title { font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+#toast-confirm-msg   { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 24px; }
+.confirm-btns { display: flex; gap: 12px; }
+.confirm-btns button { flex: 1; border: none; border-radius: 6px; padding: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: transform 0.15s, opacity 0.15s; }
+.confirm-btns button:active { transform: scale(0.96); opacity: 0.85; }
+#toast-confirm-cancel { background: var(--bg-light); color: var(--text-dark); border: 1px solid var(--border-color) !important; }
+#toast-confirm-ok     { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+
 </style>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
@@ -1783,7 +1912,7 @@ i[data-lucide] {
     .details-box {
       padding: 16px;
       border-radius: 8px;
-      background-color: var(--white);
+      background-color: var(--surface);
       border: 1px solid var(--border-color);
     }
     .pagination-bar {
@@ -1801,7 +1930,7 @@ i[data-lucide] {
     .pag-btn {
       padding: 6px 12px;
       border: 1px solid var(--border-color);
-      background-color: var(--white);
+      background-color: var(--surface);
       cursor: pointer;
       border-radius: 4px;
       font-weight: 600;
@@ -1856,7 +1985,7 @@ i[data-lucide] {
       border: 2px solid var(--accent-cyan);
     }
     .import-wizard-container {
-      background-color: var(--white);
+      background-color: var(--surface);
       border-radius: 12px;
       box-shadow: var(--shadow);
       padding: 32px;
@@ -1872,7 +2001,7 @@ i[data-lucide] {
       border-radius: 6px;
       border: 1px solid var(--border-color);
       font-size: 13.5px;
-      background-color: var(--white);
+      background-color: var(--surface);
       width: 100%;
     }
     .mapping-select.review {
@@ -1952,6 +2081,24 @@ i[data-lucide] {
   </style>
 </head>
 <body>
+
+  <!-- Toast Notification System -->
+  <div id="toast-container"></div>
+
+  <!-- Custom Confirm Dialog -->
+  <div id="toast-confirm-overlay">
+    <div id="toast-confirm-box">
+      <div id="toast-confirm-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4h6v2"></path></svg>
+      </div>
+      <div id="toast-confirm-title">Are you sure?</div>
+      <div id="toast-confirm-msg">This action cannot be undone.</div>
+      <div class="confirm-btns">
+        <button id="toast-confirm-cancel" onclick="_confirmResolve(false)">Cancel</button>
+        <button id="toast-confirm-ok" onclick="_confirmResolve(true)">Delete</button>
+      </div>
+    </div>
+  </div>
 
   <div class="app-container" style="display: block;">
     <!-- Shared Sidebar (Admin View) -->
@@ -2079,6 +2226,12 @@ i[data-lucide] {
           <button class="nav-icon-btn" id="notification-bell-btn">
             <i data-lucide="bell"></i>
             <span class="badge-count">3</span>
+          </button>
+
+          <!-- Theme toggle -->
+          <button class="theme-btn nav-icon-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
+            <i data-lucide="moon" class="theme-icon-moon"></i>
+            <i data-lucide="sun" class="theme-icon-sun" style="display:none;"></i>
           </button>
 
           <button class="lang-btn">
@@ -2216,11 +2369,12 @@ i[data-lucide] {
           </div>
         </div>
 
-        <!-- -------------------- Panel 2: People directory (Students + Teachers) -------------------- -->
+        <!-- -------------------- Panel 2: People directory (Students + Teachers + Parents) -------------------- -->
         <div class="content-panel" id="panel-people">
           <div class="tabs-container">
             <button class="tab-btn active" id="people-tab-students" onclick="switchPeopleSubtab('students')">Students Directory</button>
             <button class="tab-btn" id="people-tab-teachers" onclick="switchPeopleSubtab('teachers')">Teacher Directory</button>
+            <button class="tab-btn" id="people-tab-parents" onclick="switchPeopleSubtab('parents')">Parent Directory</button>
           </div>
 
           <!-- Students panel subtab -->
@@ -2265,6 +2419,14 @@ i[data-lucide] {
 
           <!-- Teachers panel subtab -->
           <div class="tab-panel" id="subpanel-people-teachers" style="margin-top:16px; display:none;">
+            <div class="card" style="padding:16px; margin-bottom: 16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; gap:8px;">
+                  <input type="text" class="form-input" id="teacher-search-input" placeholder="Search teacher names..." oninput="filterAdminTeachersRoster()" style="width:250px;">
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="openTeacherForm(null)">+ Add Teacher</button>
+              </div>
+            </div>
             <div class="card">
               <div class="card-title-group" style="border:none; padding:0; margin-bottom:12px;">
                 <h3 style="font-weight:700; color:var(--primary-navy);">Teacher Accounts Directory</h3>
@@ -2275,10 +2437,10 @@ i[data-lucide] {
                     <tr>
                       <th>Initials</th>
                       <th>Teacher Name</th>
-                      <th>Role Profile</th>
+                      <th>Email</th>
                       <th>Assigned Classes</th>
                       <th>Status</th>
-                      <th style="text-align:right;">Action</th>
+                      <th style="text-align:right;">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="admin-people-teachers-tbody">
@@ -2288,7 +2450,42 @@ i[data-lucide] {
               </div>
             </div>
           </div>
+
+          <!-- Parents panel subtab -->
+          <div class="tab-panel" id="subpanel-people-parents" style="margin-top:16px; display:none;">
+            <div class="card" style="padding:16px; margin-bottom: 16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; gap:8px;">
+                  <input type="text" class="form-input" id="parent-search-input" placeholder="Search parent names..." oninput="filterAdminParentsRoster()" style="width:250px;">
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="openParentForm(null)">+ Add Parent</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title-group" style="border:none; padding:0; margin-bottom:12px;">
+                <h3 style="font-weight:700; color:var(--primary-navy);">Parent Accounts Directory</h3>
+              </div>
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Initials</th>
+                      <th>Parent Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Linked Children</th>
+                      <th style="text-align:right;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-people-parents-tbody">
+                    <!-- Populated dynamically in app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
+
 
         <!-- -------------------- Panel 3: Academic Setup -------------------- -->
         <div class="content-panel" id="panel-setup">
@@ -2936,6 +3133,133 @@ i[data-lucide] {
           <button type="submit" class="btn btn-primary btn-sm">Schedule Event</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Add/Edit Teacher Modal -->
+  <div class="modal-overlay" id="add-teacher-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="teacher-modal-title">Add Teacher to Directory</h3>
+        <button class="modal-close" onclick="closeModal('add-teacher-modal')">&times;</button>
+      </div>
+      <form onsubmit="handleAdminTeacherSubmit(event)">
+        <input type="hidden" id="teacher-form-original-email">
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="form-group">
+            <label class="form-label" for="tch-name">Full Name</label>
+            <input type="text" class="form-input" id="tch-name" required placeholder="e.g. Mrs. Lakshmi Rajendran">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tch-email">Email Address</label>
+            <input type="email" class="form-input" id="tch-email" required placeholder="e.g. teacher@mts.edu">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tch-grades">Assigned Grade / Classes</label>
+            <input type="text" class="form-input" id="tch-grades" required placeholder="e.g. Grade 3-A & 4-B">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="tch-role">Role Profile</label>
+            <select class="form-input" id="tch-role">
+              <option value="Teacher">Teacher</option>
+              <option value="Teacher (Pending)">Teacher (Pending)</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('add-teacher-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Save Teacher Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add/Edit Parent Modal -->
+  <div class="modal-overlay" id="add-parent-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="parent-modal-title">Add Parent to Directory</h3>
+        <button class="modal-close" onclick="closeModal('add-parent-modal')">&times;</button>
+      </div>
+      <form onsubmit="handleAdminParentSubmit(event)">
+        <input type="hidden" id="parent-form-original-email">
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="form-group">
+            <label class="form-label" for="prn-name">Full Name</label>
+            <input type="text" class="form-input" id="prn-name" required placeholder="e.g. Priya Kumar">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prn-email">Email Address</label>
+            <input type="email" class="form-input" id="prn-email" required placeholder="e.g. parent@mts.edu">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prn-phone">Contact Phone</label>
+            <input type="text" class="form-input" id="prn-phone" required placeholder="e.g. 404-555-0245">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prn-children">Linked Children (Comma separated names)</label>
+            <input type="text" class="form-input" id="prn-children" placeholder="e.g. Anika Kumar, Rohan Kumar">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('add-parent-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Save Parent Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- View Teacher Profile Modal -->
+  <div class="modal-overlay" id="view-teacher-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Teacher Profile Details</h3>
+        <button class="modal-close" onclick="closeModal('view-teacher-modal')">&times;</button>
+      </div>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+        <div style="display:flex; align-items:center; gap:16px; border-bottom: 1px solid var(--border-color); padding-bottom:16px;">
+          <div class="student-pic-placeholder" id="view-tch-avatar" style="background-color: var(--primary-navy);">LR</div>
+          <div>
+            <h4 style="font-weight:700; color:var(--primary-navy); font-size:16px;" id="view-tch-name">Mrs. Lakshmi Rajendran</h4>
+            <p style="font-size:12.5px; color:var(--text-secondary);" id="view-tch-role">Teacher Profile</p>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; font-size:14px;">
+          <div><strong>Email Address:</strong> <span id="view-tch-email">teacher@mts.edu</span></div>
+          <div><strong>Assigned Grade / Classes:</strong> <span id="view-tch-grades">Grade 3-A & 4-B</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('view-teacher-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Parent Profile Modal -->
+  <div class="modal-overlay" id="view-parent-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Parent Profile Details</h3>
+        <button class="modal-close" onclick="closeModal('view-parent-modal')">&times;</button>
+      </div>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+        <div style="display:flex; align-items:center; gap:16px; border-bottom: 1px solid var(--border-color); padding-bottom:16px;">
+          <div class="student-pic-placeholder" id="view-prn-avatar" style="background-color: var(--accent-cyan);">PK</div>
+          <div>
+            <h4 style="font-weight:700; color:var(--primary-navy); font-size:16px;" id="view-prn-name">Priya Kumar</h4>
+            <p style="font-size:12.5px; color:var(--text-secondary);">Parent Profile</p>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; font-size:14px;">
+          <div><strong>Email Address:</strong> <span id="view-prn-email">parent@mts.edu</span></div>
+          <div><strong>Contact Phone:</strong> <span id="view-prn-phone">404-555-0245</span></div>
+          <div><strong>Linked Children:</strong> <span id="view-prn-children">Anika Kumar, Rohan Kumar</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('view-parent-modal')">Close</button>
+      </div>
     </div>
   </div>
 
