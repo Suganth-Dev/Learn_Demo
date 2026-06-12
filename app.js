@@ -107,51 +107,57 @@ const InitialSeedData = {
   bookedPtSlot: null
 };
 
-// Database Initialization (Local Storage CRUD Layer)
-// Version key - increment to force seed data reset
-const DB_VERSION = 'mts_v6';
+// ──────────────────────────────────────────────────────────────────
+// DATABASE LAYER — Powered by Supabase (supabase-db.js)
+// getDb() / saveDb() are now defined in supabase-db.js and use the
+// in-memory cache loaded from Supabase at startup.
+// All CRUD write operations call the sb* functions in supabase-db.js
+// ──────────────────────────────────────────────────────────────────
 
-function initializeDatabase() {
-  const storedVersion = localStorage.getItem('mts_db_version');
-  
-  if (storedVersion !== DB_VERSION) {
-    // New version or first load: reset to fresh seed data
-    // Preserve any user CRUD changes within same version by merging
-    localStorage.setItem('mts_data', JSON.stringify(InitialSeedData));
-    localStorage.setItem('mts_db_version', DB_VERSION);
-  } else if (!localStorage.getItem('mts_data')) {
-    // Data missing even though version matches - restore seed
-    localStorage.setItem('mts_data', JSON.stringify(InitialSeedData));
-  }
-}
-
-// Fetch database records
-function getDb() {
-  const raw = localStorage.getItem('mts_data');
-  if (!raw) {
-    localStorage.setItem('mts_data', JSON.stringify(InitialSeedData));
-    return JSON.parse(JSON.stringify(InitialSeedData));
-  }
-  try {
-    const parsed = JSON.parse(raw);
-    // Validate that core seed arrays exist; restore if corrupted
-    if (!parsed.students || !parsed.announcements || !parsed.homework) {
-      localStorage.setItem('mts_data', JSON.stringify(InitialSeedData));
-      return JSON.parse(JSON.stringify(InitialSeedData));
+// State variables & Session Helper Functions
+function getLoggedInUser() {
+  const userStr = localStorage.getItem('mts_logged_in_user');
+  if (userStr) {
+    try {
+      return JSON.parse(userStr);
+    } catch (e) {
+      console.error(e);
     }
-    return parsed;
-  } catch(e) {
-    localStorage.setItem('mts_data', JSON.stringify(InitialSeedData));
-    return JSON.parse(JSON.stringify(InitialSeedData));
+  }
+  return null;
+}
+
+function getLoggedInParentName() {
+  const user = getLoggedInUser();
+  return (user && user.role === 'parent') ? user.name : 'Priya Kumar';
+}
+
+function getLoggedInTeacherName() {
+  const user = getLoggedInUser();
+  return (user && user.role === 'teacher') ? user.name : 'Mrs. Lakshmi Rajendran';
+}
+
+function updateDashboardProfileHeader() {
+  const user = getLoggedInUser();
+  if (!user) return;
+
+  // 1. Update user-name elements (sidebar footer / profile section)
+  document.querySelectorAll('.user-name').forEach(el => {
+    el.textContent = user.name;
+  });
+
+  // 2. Update user-avatar elements with initials
+  document.querySelectorAll('.user-avatar').forEach(el => {
+    el.textContent = user.initials || user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  });
+
+  // 3. Update welcome banner greeting
+  const greetingEn = document.querySelector('.welcome-banner .lang-en, #teacher-welcome-en');
+  if (greetingEn) {
+    greetingEn.innerHTML = `Good Evening, ${user.name} 👋`;
   }
 }
 
-// Save database changes
-function saveDb(db) {
-  localStorage.setItem('mts_data', JSON.stringify(db));
-}
-
-// State variables
 let currentLanguage = localStorage.getItem('mts-lang') || 'en';
 let activeChild = localStorage.getItem('mts-active-child') || 'Anika Kumar';
 let activeThreadId = 1;
@@ -160,10 +166,71 @@ let activeClassRosterCode = 'Grade 3-A';
 let activeHomeworkSubtab = 'active';
 let activePeopleSubtab = 'students';
 
-// On Page Load Orchestration
-document.addEventListener('DOMContentLoaded', () => {
-  // Always run first — ensures seed data is guaranteed present
-  initializeDatabase();
+// On Page Load Orchestration (async — loads data from Supabase first)
+document.addEventListener('DOMContentLoaded', async () => {
+  // Show a subtle loading state
+  document.body.style.opacity = '0.7';
+
+  // Load all data from Supabase into memory cache
+  await loadAllFromSupabase();
+
+  // Subscribe to realtime changes (Without Reload Flow)
+  if (typeof sbSubscribeToHomeworkChanges === 'function') {
+    sbSubscribeToHomeworkChanges(() => {
+      console.log('[MTS] Realtime update triggered in Web App');
+      const user = getLoggedInUser();
+      if (user) {
+        if (user.role === 'teacher') {
+          if (typeof renderTeacherAssignments === 'function') renderTeacherAssignments();
+          if (typeof renderTeacherSubmissions === 'function') renderTeacherSubmissions();
+        } else if (user.role === 'parent') {
+          if (typeof renderParentHomeworkCenter === 'function') renderParentHomeworkCenter();
+        }
+      }
+    });
+  }
+
+  // Background polling sync (every 5 seconds) to handle missing Realtime
+  setInterval(async () => {
+    const user = getLoggedInUser();
+    if (!user) return;
+
+    const isModalOpen = document.querySelector('.modal.open, .modal-overlay.open, #toast-confirm-overlay.open, [id*="modal"].open') !== null;
+    const isInputFocused = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT');
+
+    // Only re-render if we are not actively editing/typing
+    if (!isModalOpen && !isInputFocused) {
+      await loadAllFromSupabase();
+      if (user.role === 'teacher') {
+        if (typeof renderTeacherAssignments === 'function') renderTeacherAssignments();
+        if (typeof renderTeacherSubmissions === 'function') renderTeacherSubmissions();
+      } else if (user.role === 'parent') {
+        if (typeof renderParentHomeworkCenter === 'function') renderParentHomeworkCenter();
+      }
+    }
+  }, 5000);
+
+  // Load dynamic activeChild & class roster codes based on logged in user
+  const user = getLoggedInUser();
+  if (user) {
+    const db = getDb();
+    if (user.role === 'parent') {
+      const parentRecord = db.parents.find(p => p.email === user.email);
+      if (parentRecord && parentRecord.children && parentRecord.children.length > 0) {
+        activeChild = localStorage.getItem('mts-active-child') || parentRecord.children[0];
+      }
+    } else if (user.role === 'teacher') {
+      const teacherRecord = db.teachers.find(t => t.email === user.email);
+      if (teacherRecord && teacherRecord.class) {
+        activeClassRosterCode = teacherRecord.class;
+      }
+    }
+  }
+
+  updateDashboardProfileHeader();
+
+  document.body.style.opacity = '1';
+
   applyLanguage(currentLanguage);
   
   // Initialize theme
@@ -421,8 +488,9 @@ function renderParentChildren() {
   if (!parentChildrenList) return;
 
   parentChildrenList.innerHTML = '';
-  // Show Priya Kumar's children Rohan Kumar and Anika Kumar
-  const myChildrenData = db.students.filter(s => s.guardian === 'Priya Kumar' || s.guardian === 'Pending link');
+  // Show logged-in parent's children
+  const parentName = getLoggedInParentName();
+  const myChildrenData = db.students.filter(s => s.guardian === parentName || s.guardian === 'Pending link');
 
   myChildrenData.forEach(c => {
     const card = document.createElement('div');
@@ -517,19 +585,31 @@ function renderParentHomeworkCenter() {
   const tbody = document.getElementById('parent-homework-center-tbody');
   if (!tbody) return;
 
+  const student = db.students.find(s => s.name === activeChild);
+  const studentClassSection = student ? (student.section || student.class) : ''; // e.g. "3-A"
+
+  const filteredHomework = db.homework.filter(hw => {
+    if (!studentClassSection) return true;
+    const hwGrade = hw.grade || '';
+    const hwClassCode = hw.classCode || '';
+    return hwGrade.includes(studentClassSection) || hwClassCode.includes(studentClassSection);
+  });
+
   tbody.innerHTML = '';
-  // Load Anika Kumar and Rohan submissions
-  db.homework.forEach(hw => {
-    // Find matching submission
+  filteredHomework.forEach(hw => {
     const sub = db.submissions.find(s => s.student === activeChild && s.assignment === hw.title);
     const statusBadge = sub 
       ? `<span class="badge ${sub.status === 'Approved' ? 'badge-green' : sub.status === 'Pending Review' ? 'badge-amber' : 'badge-red'}">${sub.status}</span>`
       : `<span class="badge badge-grey">Not Submitted</span>`;
     const comment = sub ? sub.comment || 'No feedback yet' : '&mdash;';
     
+    const attachmentHtml = hw.fileUrl 
+      ? `<br><a href="${hw.fileUrl}" target="_blank" style="color:var(--accent-cyan); font-size:12px; display:inline-flex; align-items:center; gap:4px; margin-top:4px;"><i data-lucide="external-link" style="width:12px; height:12px;"></i> View Attachment</a>`
+      : '';
+
     tbody.innerHTML += `
       <tr>
-        <td style="font-weight:700;">${hw.title}</td>
+        <td style="font-weight:700;">${hw.title}${attachmentHtml}</td>
         <td>${hw.classCode}</td>
         <td>${hw.due}</td>
         <td>${statusBadge}</td>
@@ -538,24 +618,41 @@ function renderParentHomeworkCenter() {
     `;
   });
 
+  if (typeof lucide !== 'undefined') lucide.createIcons({ node: tbody });
+
   // Populate upload assignment select box
   const select = document.getElementById('submit-hw-id');
   if (select) {
     select.innerHTML = '';
-    db.homework.forEach(hw => {
+    filteredHomework.forEach(hw => {
       select.innerHTML += `<option value="${hw.title}">${hw.title}</option>`;
     });
   }
 }
 
-window.handleParentSubmitHomework = function(event) {
+window.handleParentSubmitHomework = async function(event) {
   event.preventDefault();
   const hwTitle = document.getElementById('submit-hw-id').value;
-  const filename = document.getElementById('submit-hw-file').value;
+  const fileInput = document.getElementById('submit-hw-file');
   const comments = document.getElementById('submit-hw-comment').value;
 
+  let fileUrl = null;
+  let filename = 'homework_submission';
+  if (fileInput && fileInput.files && fileInput.files.length > 0) {
+    try {
+      showToast('Uploading homework to Supabase Storage...', 'info');
+      const file = fileInput.files[0];
+      filename = file.name;
+      fileUrl = await sbUploadFile(file, 'submissions');
+    } catch (e) {
+      console.error('[MTS] Submission upload failed:', e);
+      showToast('Failed to upload submission attachment.', 'error');
+      return;
+    }
+  }
+
   let db = getDb();
-  const fileType = filename.endsWith('.jpg') ? 'image' : filename.endsWith('.mp3') ? 'audio' : 'document';
+  const fileType = filename.endsWith('.jpg') || filename.endsWith('.png') || filename.endsWith('.jpeg') ? 'image' : filename.endsWith('.mp3') ? 'audio' : 'document';
   
   // Update or append submission
   const subIndex = db.submissions.findIndex(s => s.student === activeChild && s.assignment === hwTitle);
@@ -569,7 +666,8 @@ window.handleParentSubmitHomework = function(event) {
     file: filename,
     status: 'Pending Review',
     comment: comments,
-    fileType: fileType
+    fileType: fileType,
+    fileUrl: fileUrl
   };
 
   if (subIndex > -1) {
@@ -583,13 +681,31 @@ window.handleParentSubmitHomework = function(event) {
   if (hw) {
     hw.stats.submitted += 1;
     hw.stats.pending += 1;
+    
+    // Also sync nested submissions for immediate front-end visibility
+    if (!hw.submissions) hw.submissions = [];
+    const nestedSubIndex = hw.submissions.findIndex(s => s.student === activeChild || s.studentName === activeChild);
+    const nestedSubObj = {
+      ...subObject,
+      studentName: activeChild,
+      attachment: filename,
+      evaluation: { grade: '', comment: '' }
+    };
+    if (nestedSubIndex > -1) {
+      hw.submissions[nestedSubIndex] = nestedSubObj;
+    } else {
+      hw.submissions.push(nestedSubObj);
+    }
   }
 
   saveDb(db);
+  sbAddSubmission(subObject);
+  
   document.getElementById('submit-hw-comment').value = '';
+  if (fileInput) fileInput.value = '';
   renderParentHomeworkCenter();
   updateParentChildState(activeChild);
-  alert(`Homework submission successful: uploaded file ${filename}.`);
+  showToast(`✅ Homework submitted successfully: ${filename}.`, 'success');
 };
 
 function renderParentAnnouncements() {
@@ -600,7 +716,7 @@ function renderParentAnnouncements() {
 
   list.innerHTML = '';
   db.announcements.forEach(a => {
-    const isAcked = a.acknowledged.includes('Priya Kumar');
+    const isAcked = a.acknowledged.includes(getLoggedInParentName());
     const btnHtml = a.ackRequired 
       ? `<button class="btn btn-primary btn-sm" ${isAcked ? 'disabled' : ''} onclick="acknowledgeAnnouncement(${a.id}, this)">${isAcked ? '✓ Acknowledged' : '✓ Acknowledge'}</button>` 
       : '';
@@ -630,7 +746,7 @@ function renderParentAnnouncements() {
   // Render on home dashboard card
   if (homeBox && db.announcements.length > 0) {
     const a = db.announcements[0];
-    const isAcked = a.acknowledged.includes('Priya Kumar');
+    const isAcked = a.acknowledged.includes(getLoggedInParentName());
     const btnHtml = a.ackRequired 
       ? `<button class="btn btn-secondary btn-sm" style="margin-top:8px;" ${isAcked ? 'disabled' : ''} onclick="acknowledgeAnnouncement(${a.id}, this)">${isAcked ? '✓ Acknowledged' : '✓ Acknowledge'}</button>` 
       : '';
@@ -647,8 +763,9 @@ window.acknowledgeAnnouncement = function(id, btn) {
   let db = getDb();
   const ann = db.announcements.find(a => a.id === id);
   if (ann) {
-    if (!ann.acknowledged.includes('Priya Kumar')) {
-      ann.acknowledged.push('Priya Kumar');
+    const parentName = getLoggedInParentName();
+    if (!ann.acknowledged.includes(parentName)) {
+      ann.acknowledged.push(parentName);
       saveDb(db);
     }
   }
@@ -808,6 +925,7 @@ window.toggleMatrix = function(category, channel, checkbox) {
   let db = getDb();
   db.notificationMatrix[category][channel] = checkbox.checked;
   saveDb(db);
+  // Preferences stored in memory only (Phase 2: sbUpdateNotificationMatrix)
 };
 
 window.handleParentContactSubmit = function(event) {
@@ -823,8 +941,9 @@ window.handleParentContactSubmit = function(event) {
   }
   
   // also update students phone links
+  const parentName = getLoggedInParentName();
   db.students.forEach(s => {
-    if (s.guardian === 'Priya Kumar') s.phone = phone;
+    if (s.guardian === parentName) s.phone = phone;
   });
 
   saveDb(db);
@@ -867,17 +986,13 @@ window.handleSendMessage = function(event) {
   if (!text) return;
 
   let db = getDb();
-  
   if (!db.messages[activeThreadId]) db.messages[activeThreadId] = [];
-  
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  db.messages[activeThreadId].push({
-    type: 'sent',
-    text: text,
-    time: `Today, ${time}`
-  });
-
+  const msg = { type: 'sent', text: text, time: `Today, ${time}` };
+  db.messages[activeThreadId].push(msg);
   saveDb(db);
+  sbAddMessage(activeThreadId, msg);
+
   input.value = '';
   renderActiveChat(activeThreadId);
   
@@ -885,17 +1000,13 @@ window.handleSendMessage = function(event) {
   setTimeout(() => {
     let freshDb = getDb();
     if (!freshDb.messages[activeThreadId]) freshDb.messages[activeThreadId] = [];
-    
     let replyText = 'Received your message. Thank you for the update.';
     if (activeThreadId === 1) replyText = 'Got it, Priya! Thanks for letting me know. I will make a note of this.';
     else if (activeThreadId === 2) replyText = 'This is school admin office auto-dispatch. We have logged your request. Thank you.';
-
-    freshDb.messages[activeThreadId].push({
-      type: 'received',
-      text: replyText,
-      time: `Today, ${time}`
-    });
+    const reply = { type: 'received', text: replyText, time: `Today, ${time}` };
+    freshDb.messages[activeThreadId].push(reply);
     saveDb(freshDb);
+    sbAddMessage(activeThreadId, reply);
     renderActiveChat(activeThreadId);
   }, 2000);
 };
@@ -939,8 +1050,10 @@ function renderTeacherSPA() {
   const classesContainer = document.getElementById('teacher-home-classes-grid');
   if (classesContainer) {
     classesContainer.innerHTML = '';
-    // teacher Mrs. Lakshmi Rajendran handles Grade 3-A & Grade 4-B
-    const LakshmiClasses = db.classes.filter(c => c.teacher.includes('Lakshmi'));
+    // Filter classes taught by logged in teacher
+    const teacherName = getLoggedInTeacherName();
+    const lastName = teacherName.split(' ').pop();
+    const LakshmiClasses = db.classes.filter(c => c.teacher.includes(lastName));
     
     LakshmiClasses.forEach(c => {
       classesContainer.innerHTML += `
@@ -1143,25 +1256,22 @@ window.updateAttendanceCounters = function() {
 
 window.finaliseAttendance = function() {
   let db = getDb();
-  // Update class attendance flag inside DB class setup
   const cls = db.classes.find(c => c.code === 'Grade 3-A');
-  if (cls) {
-    cls.lastAttendance = 'Jun 13 ✅';
-  }
-  
-  db.auditLog.unshift({
-    timestamp: 'Just now',
+  if (cls) cls.lastAttendance = 'Jun 13 ✅';
+  const auditEntry = {
+    timestamp: sbTimestamp(),
     user: 'Mrs. Lakshmi',
     action: 'Attendance Session Finalise',
     target: 'Grade 3-A class',
     details: 'Attendance finalized for Friday June 13 session (Grade 3-A).',
     ip: 'teacher-classroom-network'
-  });
-
+  };
+  db.auditLog.unshift(auditEntry);
   saveDb(db);
+  // Supabase sync
+  sbFinalizeAttendance('Grade 3-A', 'Jun 13 ✅');
+  sbAddAuditLog(auditEntry);
   alert('Roster finalized. Grade 3-A session state saved successfully.');
-  
-  // toggle dashboard active
   document.querySelectorAll('.sidebar-link')[0].click();
   renderTeacherSPA();
 };
@@ -1182,9 +1292,26 @@ function renderTeacherAssignments() {
   const db = getDb();
   const container = document.getElementById('teacher-active-assignments-container');
   if (!container) return;
+  const user = getLoggedInUser();
 
   container.innerHTML = '';
   db.homework.forEach(hw => {
+    // TEMPORARILY DISABLED FILTER to see if hw renders at all
+    // let isMyClass = false;
+    // if (user) {
+    //   const hwClass = hw.classCode || hw.grade || '';
+    //   if (user.class === hwClass) isMyClass = true;
+    //   if (user.grades) {
+    //      if (user.grades.includes(hwClass)) isMyClass = true;
+    //      if (hwClass && user.grades.includes(hwClass.replace('Grade ', ''))) isMyClass = true;
+    //   }
+    // }
+    // if (!isMyClass) return;
+
+    const attachmentHtml = hw.fileUrl 
+      ? `<br><a href="${hw.fileUrl}" target="_blank" style="color:var(--accent-cyan); font-size:12px; display:inline-flex; align-items:center; gap:4px; margin-top:4px;"><i data-lucide="external-link" style="width:12px; height:12px;"></i> View Attached Reference</a>`
+      : '';
+
     container.innerHTML += `
       <div class="card" style="border-top: 5px solid ${hw.status === 'Active' ? 'var(--success-green)' : 'var(--info-blue)'}">
         <div class="card-title-group">
@@ -1195,7 +1322,7 @@ function renderTeacherAssignments() {
           <span class="badge ${hw.status === 'Active' ? 'badge-green' : 'badge-grey'}">${hw.status}</span>
         </div>
         <div class="card-content">
-          <p style="font-size:13.5px;"><strong>Instructions:</strong> ${hw.desc}</p>
+          <p style="font-size:13.5px;"><strong>Instructions:</strong> ${hw.desc}${attachmentHtml}</p>
           <div style="background-color: var(--bg-light); border-radius:8px; padding:10px; display:grid; grid-template-columns:repeat(4,1fr); text-align:center; font-size:12px; margin: 8px 0;">
             <div><strong style="color:var(--info-blue);">${hw.stats.submitted}</strong><br>Sub</div>
             <div><strong style="color:var(--success-green);">${hw.stats.approved}</strong><br>App</div>
@@ -1203,13 +1330,15 @@ function renderTeacherAssignments() {
             <div><strong style="color:var(--critical-red);">${hw.stats.overdue}</strong><br>Oved</div>
           </div>
           <div style="display:flex; gap:8px;">
-            <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="alert('Editing homework details...')">Edit Instructions</button>
             <button class="btn btn-primary btn-sm" style="flex:1;" onclick="switchHomeworkSubtab('reviews')">Review submissions</button>
+            <button class="btn btn-secondary btn-sm" style="padding: 0 12px;" onclick="openEditHomeworkModal('${hw.id}')" title="Edit"><i data-lucide="edit-3" style="width:16px;height:16px;"></i></button>
+            <button class="btn btn-secondary btn-sm" style="padding: 0 12px; color:var(--critical-red);" onclick="confirmDeleteHomework('${hw.id}')" title="Delete"><i data-lucide="trash-2" style="width:16px;height:16px;"></i></button>
           </div>
         </div>
       </div>
     `;
   });
+  if (typeof lucide !== 'undefined') lucide.createIcons({ node: container });
 }
 
 function renderTeacherSubmissions() {
@@ -1246,9 +1375,12 @@ function renderTeacherSubmissions() {
           <div class="hw-file-icon"><i data-lucide="${s.fileType === 'audio' ? 'music' : s.fileType === 'document' ? 'file-text' : 'image'}"></i></div>
           <div style="flex-grow:1;">
             <div style="font-size:13.5px; font-weight:600;">${s.file}</div>
-            <div style="font-size:11.5px; color:var(--text-secondary);">File size check verified ✅</div>
+            <div style="font-size:11.5px; color:var(--text-secondary);">${s.fileUrl ? 'Stored on Supabase Storage ✅' : 'File size check verified ✅'}</div>
           </div>
-          <button class="btn btn-secondary btn-sm" onclick="alert('Displaying attachment file content preview for ${s.file}.')">Preview Attachment</button>
+          ${s.fileUrl 
+            ? `<a href="${s.fileUrl}" target="_blank" class="btn btn-secondary btn-sm" style="display:inline-flex; align-items:center; justify-content:center; text-decoration:none;">Open File</a>`
+            : `<button class="btn btn-secondary btn-sm" onclick="alert('Simulated preview for ${s.file}.')">Preview</button>`
+          }
         </div>
 
         <div class="form-group">
@@ -1257,14 +1389,14 @@ function renderTeacherSubmissions() {
         </div>
 
         <div class="comment-tags-container">
-          <span class="comment-tag" onclick="insertTeacherFeedbackTag(${s.id}, 'Excellent effort!')">Excellent effort</span>
-          <span class="comment-tag" onclick="insertTeacherFeedbackTag(${s.id}, 'Clear handwriting!')">Clear handwriting</span>
-          <span class="comment-tag" onclick="insertTeacherFeedbackTag(${s.id}, 'Please rewrite and submit.')">Rewrite work</span>
+          <span class="comment-tag" onclick="insertTeacherFeedbackTag('${s.id}', 'Excellent effort!')">Excellent effort</span>
+          <span class="comment-tag" onclick="insertTeacherFeedbackTag('${s.id}', 'Clear handwriting!')">Clear handwriting</span>
+          <span class="comment-tag" onclick="insertTeacherFeedbackTag('${s.id}', 'Please rewrite and submit.')">Rewrite work</span>
         </div>
 
         <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--border-color); padding-top:12px; margin-top:8px;">
-          <button class="btn btn-secondary btn-sm" onclick="evaluateSubmission(${s.id}, 'Needs Correction')">Needs Work</button>
-          <button class="btn btn-primary btn-sm" style="background-color:var(--success-green);" onclick="evaluateSubmission(${s.id}, 'Approved')">Approve Work</button>
+          <button class="btn btn-secondary btn-sm" onclick="evaluateSubmission('${s.id}', 'Needs Rework')">Needs Rework</button>
+          <button class="btn btn-primary btn-sm" style="background-color:var(--success-green);" onclick="evaluateSubmission('${s.id}', 'Approved')">Approve Work</button>
         </div>
       </div>
     `;
@@ -1284,14 +1416,9 @@ window.evaluateSubmission = function(subId, newStatus) {
   let db = getDb();
   const sub = db.submissions.find(s => s.id === subId);
   const feedbackInput = document.getElementById(`feedback-comment-${subId}`);
-  
   if (sub) {
     sub.status = newStatus;
-    if (feedbackInput) {
-      sub.comment = feedbackInput.value;
-    }
-    
-    // adjust homework metrics
+    if (feedbackInput) sub.comment = feedbackInput.value;
     const hw = db.homework.find(h => h.title === sub.assignment);
     if (hw) {
       if (newStatus === 'Approved') {
@@ -1301,40 +1428,193 @@ window.evaluateSubmission = function(subId, newStatus) {
         hw.stats.overdue += 1;
         if (hw.stats.pending > 0) hw.stats.pending -= 1;
       }
+      
+      // Also sync nested submissions for immediate front-end visibility
+      if (hw.submissions) {
+        const nestedSub = hw.submissions.find(s => s.id === subId);
+        if (nestedSub) {
+          nestedSub.status = newStatus;
+          if (feedbackInput) {
+            nestedSub.comment = feedbackInput.value;
+            nestedSub.evaluation.comment = feedbackInput.value;
+          }
+          nestedSub.evaluation.grade = newStatus === 'Approved' ? 'Approved' : 'Needs Rework';
+        }
+      }
+      
+      sbUpdateHomeworkStats(hw.id, hw.stats);
     }
-    
     saveDb(db);
+    sbUpdateSubmission(subId, newStatus, sub.comment);
     renderTeacherSubmissions();
     alert(`Roster evaluation for ${sub.student} completed: marked ${newStatus}`);
   }
 };
 
-window.handleNewHomeworkSubmit = function(event) {
+window.handleNewHomeworkSubmit = async function(event) {
   event.preventDefault();
   const title = document.getElementById('hw-title').value;
   const titleTa = document.getElementById('hw-title-ta').value;
   const classCode = document.getElementById('hw-class').value;
   const due = document.getElementById('hw-due').value;
   const desc = document.getElementById('hw-desc').value;
+  const fileInput = document.getElementById('hw-file');
 
-  let db = getDb();
-  const newId = db.homework.length + 1;
-  
-  db.homework.push({
-    id: newId,
-    title: title,
-    titleTa: titleTa || title,
-    classCode: classCode,
-    due: due,
+  let fileUrl = null;
+  if (fileInput && fileInput.files && fileInput.files.length > 0) {
+    try {
+      // Show loading indicator / toast
+      showToast('Uploading attachment to Supabase Storage...', 'info');
+      fileUrl = await sbUploadFile(fileInput.files[0], 'homework');
+    } catch (e) {
+      console.error('[MTS] Upload failed:', e);
+      showToast('Attachment upload failed. Continuing without file.', 'error');
+    }
+  }
+
+  const newHw = {
+    id: 'hw-' + Date.now().toString().slice(-6),
+    title: title, titleTa: titleTa || title,
+    classCode: classCode, due: due,
     stats: { submitted: 0, approved: 0, pending: 0, overdue: 0 },
-    status: 'Active',
-    desc: desc
-  });
+    status: 'Active', desc: desc,
+    fileUrl: fileUrl
+  };
 
-  saveDb(db);
-  closeModal('new-hw-modal');
-  renderTeacherAssignments();
-  alert(`Assignment "${title}" has been published and sent to parent dashboards.`);
+  try {
+    const rawData = await sbAddHomework(newHw);
+    let db = getDb();
+    
+    // Properly map and fallback fields (dueDate, description, grade, submissions)
+    const mappedHw = rawData ? mapHomework(rawData) : {
+      ...newHw,
+      dueDate: newHw.due,
+      description: newHw.desc,
+      grade: newHw.classCode ? newHw.classCode.replace('Grade ', '') : '',
+      submissions: []
+    };
+    
+    db.homework.unshift(mappedHw);
+    saveDb(db);
+
+    closeModal('new-hw-modal');
+    if (fileInput) fileInput.value = '';
+    renderTeacherAssignments();
+    showToast(`✅ Assignment "${title}" published successfully.`, 'success');
+  } catch (err) {
+    console.error('[MTS] Failed to save homework:', err);
+    showToast('Failed to save assignment in database.', 'error');
+  }
+};
+
+window.openEditHomeworkModal = function(hwId) {
+  const db = getDb();
+  const hw = db.homework.find(h => h.id === hwId);
+  if (!hw) return;
+
+  document.getElementById('edit-hw-id').value = hw.id;
+  document.getElementById('edit-hw-title').value = hw.title;
+  document.getElementById('edit-hw-title-ta').value = hw.titleTa || '';
+  
+  // Populate dropdown
+  const classDropdown = document.getElementById('edit-hw-class');
+  const user = getLoggedInUser();
+  if (classDropdown) {
+    classDropdown.innerHTML = '';
+    let optionsToRender = [];
+    if (user && user.grades) {
+      optionsToRender = user.grades.split('&').map(g => g.trim());
+    } else {
+      // Fallback if grades string is not cached in this session
+      optionsToRender = ['Grade 3-A', 'Grade 4-B'];
+      if (hw.classCode && !optionsToRender.includes(hw.classCode)) {
+        optionsToRender.push(hw.classCode);
+      }
+    }
+    
+    optionsToRender.forEach(g => {
+      const opt = document.createElement('option');
+      opt.value = g;
+      opt.textContent = g;
+      if (g === hw.classCode || g === hw.grade) opt.selected = true;
+      classDropdown.appendChild(opt);
+    });
+  }
+  
+  // Try mapping property formats
+  document.getElementById('edit-hw-due').value = hw.due || hw.dueDate || '';
+  document.getElementById('edit-hw-desc').value = hw.desc || hw.description || '';
+  document.getElementById('edit-hw-current-file').innerHTML = hw.fileUrl ? 
+    `<a href="${hw.fileUrl}" target="_blank" style="color:var(--accent-cyan);">Currently attached file</a>. Leave empty to keep it.` : 
+    `No file attached. Leave empty to ignore.`;
+
+  openModal('edit-hw-modal');
+};
+
+window.handleEditHomeworkSubmit = async function(event) {
+  event.preventDefault();
+  const hwId = document.getElementById('edit-hw-id').value;
+  const title = document.getElementById('edit-hw-title').value;
+  const titleTa = document.getElementById('edit-hw-title-ta').value;
+  const classCode = document.getElementById('edit-hw-class').value;
+  const due = document.getElementById('edit-hw-due').value;
+  const desc = document.getElementById('edit-hw-desc').value;
+  const fileInput = document.getElementById('edit-hw-file');
+  const btn = document.getElementById('edit-hw-submit-btn');
+
+  const oldText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = 'Updating...';
+
+  try {
+    const updates = {
+      title, titleTa, classCode, due, desc
+    };
+
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+      showToast('Uploading new attachment to Supabase...', 'info');
+      updates.fileUrl = await sbUploadFile(fileInput.files[0], 'homework');
+    }
+
+    await sbUpdateHomework(hwId, updates);
+    
+    // Quick update local memory before full realtime fetch catches it
+    let db = getDb();
+    const hwIndex = db.homework.findIndex(h => h.id === hwId);
+    if (hwIndex > -1) {
+      db.homework[hwIndex] = { ...db.homework[hwIndex], ...updates };
+      saveDb(db);
+    }
+
+    closeModal('edit-hw-modal');
+    renderTeacherAssignments();
+    showToast(`✅ Assignment updated successfully.`, 'success');
+  } catch (err) {
+    console.error('[MTS] Update error:', err);
+    showToast('Failed to update assignment.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = oldText;
+  }
+};
+
+window.confirmDeleteHomework = async function(hwId) {
+  if (confirm("Are you sure you want to delete this assignment? All submissions will also be deleted.")) {
+    try {
+      showToast('Deleting assignment...', 'info');
+      await sbDeleteHomework(hwId);
+      
+      let db = getDb();
+      db.homework = db.homework.filter(h => h.id !== hwId);
+      saveDb(db);
+      
+      renderTeacherAssignments();
+      showToast(`Assignment deleted successfully.`, 'warning');
+    } catch (err) {
+      console.error('[MTS] Delete error:', err);
+      showToast('Failed to delete assignment.', 'error');
+    }
+  }
 };
 
 function renderTeacherAnnouncements() {
@@ -1402,27 +1682,19 @@ window.handleTeacherSendMessage = function(event) {
 
   let db = getDb();
   if (!db.messages[activeTeacherThreadId]) db.messages[activeTeacherThreadId] = [];
-  
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  db.messages[activeTeacherThreadId].push({
-    type: 'sent',
-    text: text,
-    time: `Today, ${time}`
-  });
-
+  const msg = { type: 'sent', text: text, time: `Today, ${time}` };
+  db.messages[activeTeacherThreadId].push(msg);
   saveDb(db);
+  sbAddMessage(activeTeacherThreadId, msg);
   input.value = '';
   renderTeacherActiveChat(activeTeacherThreadId);
-  
-  // mock response
   setTimeout(() => {
     let freshDb = getDb();
-    freshDb.messages[activeTeacherThreadId].push({
-      type: 'received',
-      text: 'Thank you for the message! I will make sure we practice this at home.',
-      time: `Today, ${time}`
-    });
+    const reply = { type: 'received', text: 'Thank you for the message! I will make sure we practice this at home.', time: `Today, ${time}` };
+    freshDb.messages[activeTeacherThreadId].push(reply);
     saveDb(freshDb);
+    sbAddMessage(activeTeacherThreadId, reply);
     renderTeacherActiveChat(activeTeacherThreadId);
   }, 2000);
 };
@@ -1514,26 +1786,26 @@ function renderAdminApprovals() {
 
 window.approveLinkageItem = function(rowId, name) {
   let db = getDb();
-  const item = db.approvals.find(a => a.id === rowId);
+  const item = db.approvals.find(a => String(a.id) === String(rowId));
   if (item) {
     item.status = 'Approved';
-    
-    // If it is a student link approval, update status of student
     if (name.includes('Padma Subramaniam') || name.includes('Siddharth Nair')) {
       const stud = db.students.find(s => s.name === 'Siddharth Nair');
       if (stud) stud.status = 'Active';
+      sbUpdateStudentStatus('Siddharth Nair', 'Active');
     }
-
-    db.auditLog.unshift({
-      timestamp: 'Just now',
+    const auditEntry = {
+      timestamp: sbTimestamp(),
       user: 'Admin Suresh',
       action: 'Linkage Approval',
       target: name,
       details: `Approved linkage request for ${name}.`,
       ip: '192.168.1.45'
-    });
-
+    };
+    db.auditLog.unshift(auditEntry);
     saveDb(db);
+    sbUpdateApproval(rowId, 'Approved');
+    sbAddAuditLog(auditEntry);
     renderAdminSPA();
     alert(`Linkage registration profile for "${name}" approved successfully.`);
   }
@@ -1542,10 +1814,11 @@ window.approveLinkageItem = function(rowId, name) {
 window.rejectLinkageItem = function(rowId) {
   if (confirm('Are you sure you want to reject this linkage registration request?')) {
     let db = getDb();
-    const item = db.approvals.find(a => a.id === rowId);
+    const item = db.approvals.find(a => String(a.id) === String(rowId));
     if (item) {
       item.status = 'Rejected';
       saveDb(db);
+      sbUpdateApproval(rowId, 'Rejected');
       renderAdminSPA();
     }
   }
@@ -1558,7 +1831,7 @@ window.handleStatusCardSubmit = function(event) {
   const parking = document.getElementById('stat-parking').value;
 
   let db = getDb();
-  db.schoolStatus = {
+  const newStatus = {
     status: status,
     statusText: status === 'red' ? '🔴 CLASS CANCELLED' : status === 'amber' ? '⚠️ MODIFIED' : '✅ CLASS ON',
     statusTextTa: status === 'red' ? '🔴 வகுப்பு ரத்து செய்யப்பட்டுள்ளது' : status === 'amber' ? '⚠️ மாற்றியமைக்கப்பட்ட வகுப்பு' : '✅ வகுப்பு நடைபெறும்',
@@ -1566,8 +1839,9 @@ window.handleStatusCardSubmit = function(event) {
     parking: parking,
     note: 'Friday zones updated.'
   };
-
+  db.schoolStatus = newStatus;
   saveDb(db);
+  sbUpdateSchoolStatus(newStatus);
   alert('School Status Card updated. Changes pushed immediately to parent dashboards.');
 };
 
@@ -1591,7 +1865,7 @@ window.updateAdminLivePreview = function() {
   }
 };
 
-window.handlePublishAnnouncement = function(event) {
+window.handlePublishAnnouncement = async function(event) {
   event.preventDefault();
   const priority = document.querySelector('input[name="priority"]:checked').value;
   const titleEn = document.getElementById('comp-title-en').value;
@@ -1602,32 +1876,25 @@ window.handlePublishAnnouncement = function(event) {
   const ack = document.getElementById('comp-ack').checked;
 
   let db = getDb();
-  const newId = db.announcements.length + 1;
   const dateStr = new Date().toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
-
-  db.announcements.unshift({
-    id: newId,
+  const newAnn = {
+    id: 'ann-' + Date.now().toString().slice(-6),
     priority: priority,
     badge: priority === 'urgent' ? '🔴 URGENT' : priority === 'important' ? '🟡 IMPORTANT' : '🔵 INFO',
-    title: titleEn,
-    titleTa: titleTa || titleEn,
-    body: bodyEn,
-    bodyTa: bodyTa || bodyEn,
+    title: titleEn, titleTa: titleTa || titleEn,
+    body: bodyEn, bodyTa: bodyTa || bodyEn,
     date: dateStr,
     audience: audience === 'all' ? 'All Parents & Teachers' : 'All Parents',
-    ackRequired: ack,
-    acknowledged: []
-  });
-
+    ackRequired: ack, acknowledged: []
+  };
+  db.announcements.unshift(newAnn);
   saveDb(db);
+  await sbAddAnnouncement(newAnn);
   alert('Broadcast Announcement published successfully.');
-  
-  // Clear composer fields
   document.getElementById('comp-title-en').value = '';
   document.getElementById('comp-title-ta').value = '';
   document.getElementById('comp-body-en').value = '';
   document.getElementById('comp-body-ta').value = '';
-
   document.querySelector('[data-lucide=home]').parentElement.click();
   renderAdminSPA();
 };
@@ -1741,13 +2008,13 @@ window.switchStudentProfileTab = function(tabId) {
 window.saveInternalStudentNotes = function() {
   const notes = document.getElementById('so-local-notes').value;
   const studentId = window.currentSlideoverStudentId;
-
   if (studentId) {
     let db = getDb();
     const s = db.students.find(stud => stud.id === studentId);
     if (s) {
       s.notes = notes;
       saveDb(db);
+      sbUpdateStudentNotes(studentId, notes);
       renderAdminStudentsTable();
       closeSlideover();
       alert('Internal local student Notes updated and saved.');
@@ -1765,34 +2032,26 @@ window.handleAdminAddStudentSubmit = function(event) {
   const guardian = document.getElementById('as-guardian').value;
 
   let db = getDb();
-  const newId = 'MTS-0' + (db.students.length + 1);
-  const time = new Date().toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
-
-  db.students.push({
-    id: newId,
-    name: name,
-    tamilName: tamilName || name,
-    grade: grade,
-    section: section,
-    itaId: itaId,
-    guardian: guardian,
-    status: 'Active',
-    dob: '2017-06-15',
-    enrollDate: '2025-06-09',
-    phone: '404-555-9000',
-    notes: 'Manually created student profile.'
-  });
-
-  db.auditLog.unshift({
-    timestamp: 'Just now',
+  const newId = 'MTS-' + String(db.students.length + 1).padStart(3, '0');
+  const newStudent = {
+    id: newId, name: name, tamilName: tamilName || name,
+    grade: grade, section: section, itaId: itaId, guardian: guardian,
+    status: 'Active', dob: '2017-06-15', enrollDate: new Date().toISOString().split('T')[0],
+    phone: '404-555-9000', notes: 'Manually created student profile.'
+  };
+  const auditEntry = {
+    timestamp: sbTimestamp(),
     user: 'Admin Suresh',
     action: 'Student Add',
     target: name,
     details: `Added new student ${name} manually to directory.`,
     ip: '192.168.1.45'
-  });
-
+  };
+  db.students.push(newStudent);
+  db.auditLog.unshift(auditEntry);
   saveDb(db);
+  sbAddStudent(newStudent);
+  sbAddAuditLog(auditEntry);
   closeModal('add-student-modal');
   renderAdminSPA();
   alert(`Student profile for "${name}" registered successfully.`);
@@ -1988,7 +2247,7 @@ window.toggleRsvpDetails = function(id) {
   }
 };
 
-window.handleCreateEventSubmit = function(event) {
+window.handleCreateEventSubmit = async function(event) {
   event.preventDefault();
   const name = document.getElementById('ev-name').value;
   const date = document.getElementById('ev-date').value;
@@ -1997,22 +2256,17 @@ window.handleCreateEventSubmit = function(event) {
   const audience = document.getElementById('ev-audience').value;
 
   let db = getDb();
-  const newId = db.events.length + 1;
   const dateObj = new Date(date);
   const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
-  db.events.push({
-    id: newId,
-    name: name,
-    date: formattedDate,
-    type: type,
-    audience: audience,
-    capacity: parseInt(capacity),
-    rsvps: { yes: 0, no: 0 },
-    status: 'RSVPs Open'
-  });
-
+  const newEvent = {
+    id: 'evt-' + Date.now().toString().slice(-6),
+    name: name, date: formattedDate, type: type,
+    audience: audience, capacity: parseInt(capacity),
+    rsvps: { yes: 0, no: 0 }, status: 'RSVPs Open'
+  };
+  db.events.push(newEvent);
   saveDb(db);
+  await sbAddEvent(newEvent);
   closeModal('create-event-modal');
   renderAdminEventsList();
   alert(`Event "${name}" scheduled successfully.`);
@@ -2045,8 +2299,9 @@ function renderAdminSessions() {
 window.terminateAdminSession = function(id) {
   if (confirm('Force terminate this device connection profiles?')) {
     let db = getDb();
-    db.sessions = db.sessions.filter(s => s.id !== id);
+    db.sessions = db.sessions.filter(s => String(s.id) !== String(id));
     saveDb(db);
+    sbDeleteSession(id);
     renderAdminSessions();
     alert('Active device profiles logged out successfully.');
   }
@@ -2291,6 +2546,7 @@ window.openTeacherForm = function(email = null) {
     formEmail.disabled = true;
     document.getElementById('tch-grades').value = t.grades || '';
     document.getElementById('tch-role').value = t.role || 'Teacher';
+    document.getElementById('tch-password').value = t.password || '';
   } else {
     title.textContent = 'Add Teacher';
     document.getElementById('teacher-form-original-email').value = '';
@@ -2299,6 +2555,7 @@ window.openTeacherForm = function(email = null) {
     formEmail.disabled = false;
     document.getElementById('tch-grades').value = '';
     document.getElementById('tch-role').value = 'Teacher';
+    document.getElementById('tch-password').value = '';
   }
   openModal('add-teacher-modal');
 };
@@ -2311,7 +2568,13 @@ window.handleAdminTeacherSubmit = function(event) {
   const email = document.getElementById('tch-email').value.trim();
   const grades = document.getElementById('tch-grades').value.trim();
   const role = document.getElementById('tch-role').value;
-  
+  const password = document.getElementById('tch-password').value;
+  const auditEntry = {
+    timestamp: sbTimestamp(), user: 'admin@mts.edu',
+    action: origEmail ? 'Teacher Edit' : 'Teacher Add',
+    target: name,
+    details: origEmail ? `Updated teacher profile: ${email}` : `Created new teacher profile: ${email}`
+  };
   if (origEmail) {
     const idx = db.teachers.findIndex(x => x.email === origEmail);
     if (idx >= 0) {
@@ -2319,38 +2582,26 @@ window.handleAdminTeacherSubmit = function(event) {
       db.teachers[idx].grades = grades;
       db.teachers[idx].role = role;
       db.teachers[idx].initials = getInitials(name);
+      db.teachers[idx].password = password;
     }
-    db.auditLog.unshift({
-      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      user: 'admin@mts.edu',
-      action: 'Teacher Edit',
-      target: name,
-      details: `Updated teacher profile: ${email}`
-    });
+    db.auditLog.unshift(auditEntry);
+    saveDb(db);
+    sbUpdateTeacher(origEmail, { name, grades, role, initials: getInitials(name), password });
+    sbAddAuditLog(auditEntry);
     showToast(`✏️ Teacher "${name}" updated successfully.`, 'success');
   } else {
     if (db.teachers.some(x => x.email.toLowerCase() === email.toLowerCase())) {
       showToast('A teacher with this email already exists.', 'error');
       return;
     }
-    const newT = {
-      email,
-      name,
-      role,
-      initials: getInitials(name),
-      grades
-    };
+    const newT = { email, name, role, initials: getInitials(name), grades, password };
     db.teachers.push(newT);
-    db.auditLog.unshift({
-      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      user: 'admin@mts.edu',
-      action: 'Teacher Add',
-      target: name,
-      details: `Created new teacher profile: ${email}`
-    });
+    db.auditLog.unshift(auditEntry);
+    saveDb(db);
+    sbAddTeacher(newT);
+    sbAddAuditLog(auditEntry);
     showToast(`✅ Teacher "${name}" added successfully.`, 'success');
   }
-  saveDb(db);
   closeModal('add-teacher-modal');
   renderAdminTeachersTable();
 };
@@ -2374,14 +2625,15 @@ window.deleteTeacherRecord = function(email) {
   showConfirm('Delete Teacher', `Are you sure you want to permanently remove "${t.name}"?`, () => {
     let freshDb = getDb();
     freshDb.teachers = freshDb.teachers.filter(x => x.email !== email);
-    freshDb.auditLog.unshift({
-      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      user: 'admin@mts.edu',
-      action: 'Teacher Delete',
-      target: t.name,
+    const auditEntry = {
+      timestamp: sbTimestamp(), user: 'admin@mts.edu',
+      action: 'Teacher Delete', target: t.name,
       details: `Deleted teacher profile: ${email}`
-    });
+    };
+    freshDb.auditLog.unshift(auditEntry);
     saveDb(freshDb);
+    sbDeleteTeacher(email);
+    sbAddAuditLog(auditEntry);
     showToast(`🗑️ Teacher "${t.name}" deleted successfully.`, 'warning');
     renderAdminTeachersTable();
   });
@@ -2408,6 +2660,7 @@ window.openParentForm = function(email = null) {
     formEmail.disabled = true;
     document.getElementById('prn-phone').value = p.phone || '';
     document.getElementById('prn-children').value = (p.children || []).join(', ');
+    document.getElementById('prn-password').value = p.password || '';
   } else {
     title.textContent = 'Add Parent';
     document.getElementById('parent-form-original-email').value = '';
@@ -2416,6 +2669,7 @@ window.openParentForm = function(email = null) {
     formEmail.disabled = false;
     document.getElementById('prn-phone').value = '';
     document.getElementById('prn-children').value = '';
+    document.getElementById('prn-password').value = '';
   }
   openModal('add-parent-modal');
 };
@@ -2428,8 +2682,14 @@ window.handleAdminParentSubmit = function(event) {
   const email = document.getElementById('prn-email').value.trim();
   const phone = document.getElementById('prn-phone').value.trim();
   const kidsStr = document.getElementById('prn-children').value.trim();
+  const password = document.getElementById('prn-password').value;
   const children = kidsStr ? kidsStr.split(',').map(x => x.trim()).filter(Boolean) : [];
-
+  const auditEntry = {
+    timestamp: sbTimestamp(), user: 'admin@mts.edu',
+    action: origEmail ? 'Parent Edit' : 'Parent Add',
+    target: name,
+    details: origEmail ? `Updated parent profile: ${email}` : `Created new parent profile: ${email}`
+  };
   if (origEmail) {
     const idx = db.parents.findIndex(x => x.email === origEmail);
     if (idx >= 0) {
@@ -2437,39 +2697,26 @@ window.handleAdminParentSubmit = function(event) {
       db.parents[idx].phone = phone;
       db.parents[idx].children = children;
       db.parents[idx].initials = getInitials(name);
+      db.parents[idx].password = password;
     }
-    db.auditLog.unshift({
-      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      user: 'admin@mts.edu',
-      action: 'Parent Edit',
-      target: name,
-      details: `Updated parent profile: ${email}`
-    });
+    db.auditLog.unshift(auditEntry);
+    saveDb(db);
+    sbUpdateParent(origEmail, { name, phone, children, initials: getInitials(name), password });
+    sbAddAuditLog(auditEntry);
     showToast(`✏️ Parent "${name}" updated successfully.`, 'success');
   } else {
     if (db.parents.some(x => x.email.toLowerCase() === email.toLowerCase())) {
       showToast('A parent with this email already exists.', 'error');
       return;
     }
-    const newP = {
-      email,
-      name,
-      role: 'Parent',
-      initials: getInitials(name),
-      phone,
-      children
-    };
+    const newP = { email, name, role: 'Parent', initials: getInitials(name), phone, children, password };
     db.parents.push(newP);
-    db.auditLog.unshift({
-      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      user: 'admin@mts.edu',
-      action: 'Parent Add',
-      target: name,
-      details: `Created new parent profile: ${email}`
-    });
+    db.auditLog.unshift(auditEntry);
+    saveDb(db);
+    sbAddParent(newP);
+    sbAddAuditLog(auditEntry);
     showToast(`✅ Parent "${name}" added successfully.`, 'success');
   }
-  saveDb(db);
   closeModal('add-parent-modal');
   renderAdminParentsTable();
 };
@@ -2493,14 +2740,15 @@ window.deleteParentRecord = function(email) {
   showConfirm('Delete Parent', `Are you sure you want to permanently remove "${p.name}"?`, () => {
     let freshDb = getDb();
     freshDb.parents = freshDb.parents.filter(x => x.email !== email);
-    freshDb.auditLog.unshift({
-      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      user: 'admin@mts.edu',
-      action: 'Parent Delete',
-      target: p.name,
+    const auditEntry = {
+      timestamp: sbTimestamp(), user: 'admin@mts.edu',
+      action: 'Parent Delete', target: p.name,
       details: `Deleted parent profile: ${email}`
-    });
+    };
+    freshDb.auditLog.unshift(auditEntry);
     saveDb(freshDb);
+    sbDeleteParent(email);
+    sbAddAuditLog(auditEntry);
     showToast(`🗑️ Parent "${p.name}" deleted successfully.`, 'warning');
     renderAdminParentsTable();
   });
@@ -2591,57 +2839,37 @@ window.handleParentChildSubmit = function(event) {
   const photo = document.getElementById('ch-photo').value;
   const medical = document.getElementById('ch-medical').value;
   const notes = document.getElementById('ch-notes').value.trim();
-
+  const auditEntry = {
+    timestamp: sbTimestamp(), user: 'parent@mts.edu',
+    action: id ? 'Child Profile Edit' : 'Child Profile Add',
+    target: name,
+    details: id ? `Updated child details for: ${name}` : `Registered child to parent roster: ${name}`
+  };
   if (id) {
     const idx = db.students.findIndex(x => x.id === id);
     if (idx >= 0) {
-      db.students[idx].name = name;
-      db.students[idx].tamilName = tamilName;
-      db.students[idx].grade = grade;
-      db.students[idx].section = section;
-      db.students[idx].itaId = itaId;
-      db.students[idx].dob = dob;
-      db.students[idx].photoConsent = photo;
-      db.students[idx].medicalForm = medical;
-      db.students[idx].notes = notes;
+      Object.assign(db.students[idx], { name, tamilName, grade, section, itaId, dob, photoConsent: photo, medicalForm: medical, notes });
+      sbUpdateStudent(db.students[idx]);
     }
-    db.auditLog.unshift({
-      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      user: 'parent@mts.edu',
-      action: 'Child Profile Edit',
-      target: name,
-      details: `Updated child details for: ${name}`
-    });
+    db.auditLog.unshift(auditEntry);
+    saveDb(db);
+    sbAddAuditLog(auditEntry);
     showToast(`✏️ Child details for "${name}" updated successfully.`, 'success');
   } else {
     const newId = 'MTS-' + String(db.students.length + 1).padStart(3, '0');
     const newKid = {
-      id: newId,
-      name,
-      tamilName,
-      grade,
-      section,
-      itaId,
-      guardian: 'Priya Kumar',
-      status: 'Active',
-      dob,
+      id: newId, name, tamilName, grade, section, itaId,
+      guardian: getLoggedInParentName(), status: 'Active', dob,
       enrollDate: new Date().toISOString().split('T')[0],
-      phone: '404-555-0245',
-      notes,
-      photoConsent: photo,
-      medicalForm: medical
+      phone: '404-555-0245', notes, photoConsent: photo, medicalForm: medical
     };
     db.students.push(newKid);
-    db.auditLog.unshift({
-      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      user: 'parent@mts.edu',
-      action: 'Child Profile Add',
-      target: name,
-      details: `Registered child to parent roster: ${name}`
-    });
+    db.auditLog.unshift(auditEntry);
+    saveDb(db);
+    sbAddStudent(newKid);
+    sbAddAuditLog(auditEntry);
     showToast(`✅ Child "${name}" added successfully.`, 'success');
   }
-  saveDb(db);
   closeModal('add-child-modal');
   renderParentChildren();
 
@@ -2693,24 +2921,23 @@ window.deleteChildRecord = function(studentId) {
   const db = getDb();
   const s = db.students.find(x => x.id === studentId);
   if (!s) return;
-  
   const seedIds = ['MTS-001', 'MTS-002', 'MTS-003', 'MTS-004', 'MTS-005'];
   if (seedIds.includes(studentId)) {
     showToast(`⛔ Cannot delete seed child profile "${s.name}".`, 'error');
     return;
   }
-  
   showConfirm('Delete Child', `Are you sure you want to permanently remove "${s.name}"?`, () => {
     let freshDb = getDb();
     freshDb.students = freshDb.students.filter(x => x.id !== studentId);
-    freshDb.auditLog.unshift({
-      timestamp: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      user: 'parent@mts.edu',
-      action: 'Child Profile Delete',
-      target: s.name,
+    const auditEntry = {
+      timestamp: sbTimestamp(), user: 'parent@mts.edu',
+      action: 'Child Profile Delete', target: s.name,
       details: `Deleted student profile: ${studentId}`
-    });
+    };
+    freshDb.auditLog.unshift(auditEntry);
     saveDb(freshDb);
+    sbDeleteStudent(studentId);
+    sbAddAuditLog(auditEntry);
     showToast(`🗑️ Child "${s.name}" deleted successfully.`, 'warning');
     renderParentChildren();
     

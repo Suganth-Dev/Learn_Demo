@@ -7,6 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+Tamil:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <!-- MTS Shared Database Layer (Supabase) -->
+  <script src="../supabase-db.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -801,7 +805,7 @@
             <span class="lang-ta">டெமோ — தானாக நிரப்பு</span>
           </div>
 
-          <button class="demo-btn" onclick="autoFill('parent','parent@mts.edu','Parent@123')">
+          <button class="demo-btn" onclick="autoFill('parent','parent@mts.edu','parent123')">
             <div class="demo-btn-left">
               <div class="demo-role-icon parent">👨‍👩‍👧</div>
               <div>
@@ -812,7 +816,7 @@
             <i data-lucide="arrow-right" class="demo-arrow" style="width:15px;height:15px;"></i>
           </button>
 
-          <button class="demo-btn" onclick="autoFill('teacher','teacher@mts.edu','Teacher@123')">
+          <button class="demo-btn" onclick="autoFill('teacher','teacher@mts.edu','teacher123')">
             <div class="demo-btn-left">
               <div class="demo-role-icon teacher">👩‍🏫</div>
               <div>
@@ -823,7 +827,7 @@
             <i data-lucide="arrow-right" class="demo-arrow" style="width:15px;height:15px;"></i>
           </button>
 
-          <button class="demo-btn" onclick="autoFill('admin','admin@mts.edu','Admin@123')">
+          <button class="demo-btn" onclick="autoFill('admin','admin@mts.edu','admin123')">
             <div class="demo-btn-left">
               <div class="demo-role-icon admin">🛠️</div>
               <div>
@@ -845,6 +849,7 @@
   </div>
 
   <script src="app.js"></script>
+  <script src="../supabase-db.js"></script>
   <script>
     // ── Aurora background animation ──────────────────────────────────
     (function() {
@@ -937,14 +942,47 @@
     window.currentTheme = localStorage.getItem('theme') || 'light';
 
     // ── Login routing ──────────────────────────────────────────────────
-    window.handleLoginSubmit = function(e) {
+    window.handleLoginSubmit = async function(e) {
       e.preventDefault();
-      const routes = {
-        parent: 'parent-dashboard.html',
-        teacher: 'teacher-dashboard.html',
-        admin: 'admin-dashboard.html',
-      };
-      window.location.href = routes[window.currentRole];
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+      const role = window.currentRole;
+
+      const signinBtn = document.getElementById('signin-btn');
+      if (signinBtn) {
+        signinBtn.disabled = true;
+        signinBtn.innerHTML = '<span class="lang-en">Signing in...</span><span class="lang-ta">உள்நுழைகிறது...</span>';
+      }
+
+      const user = await sbVerifyCredentials(email, password, role);
+
+      if (signinBtn) {
+        signinBtn.disabled = false;
+        signinBtn.innerHTML = '<i data-lucide="log-in" style="width:17px;height:17px;"></i> <span class="lang-en">Sign In</span><span class="lang-ta">உள்நுழைய</span>';
+        if (typeof lucide !== 'undefined') lucide.createIcons({ node: signinBtn });
+      }
+
+      if (user) {
+        localStorage.setItem('mts_logged_in_user', JSON.stringify({
+          email: user.email,
+          name: user.name,
+          role: role,
+          initials: user.initials || '',
+          phone: user.phone || '',
+          children: user.children || [],
+          class: user.class || '',
+          grades: user.grades || ''
+        }));
+        
+        const routes = {
+          parent: 'parent-dashboard.html',
+          teacher: 'teacher-dashboard.html',
+          admin: 'admin-dashboard.html',
+        };
+        window.location.href = routes[role];
+      } else {
+        alert('Invalid email or password. Please try again.');
+      }
     };
 
     // ── Password toggle ───────────────────────────────────────────────
@@ -970,9 +1008,8 @@
       setTimeout(function() {
         btn.style.opacity = '1';
         btn.style.transform = '';
-        // Direct navigation — bypass all form event issues
-        const routes = { parent: 'parent-dashboard.html', teacher: 'teacher-dashboard.html', admin: 'admin-dashboard.html' };
-        window.location.href = routes[window.currentRole];
+        const signinBtn = document.getElementById('signin-btn');
+        if (signinBtn) signinBtn.click();
       }, 380);
     };
 

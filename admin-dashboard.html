@@ -3166,6 +3166,10 @@ i[data-lucide] {
               <option value="Admin">Admin</option>
             </select>
           </div>
+          <div class="form-group">
+            <label class="form-label" for="tch-password">Login Password</label>
+            <input type="password" class="form-input" id="tch-password" required placeholder="Enter password">
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('add-teacher-modal')">Cancel</button>
@@ -3200,6 +3204,10 @@ i[data-lucide] {
           <div class="form-group">
             <label class="form-label" for="prn-children">Linked Children (Comma separated names)</label>
             <input type="text" class="form-input" id="prn-children" placeholder="e.g. Anika Kumar, Rohan Kumar">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prn-password">Login Password</label>
+            <input type="password" class="form-input" id="prn-password" required placeholder="Enter password">
           </div>
         </div>
         <div class="modal-footer">
@@ -3263,6 +3271,10 @@ i[data-lucide] {
     </div>
   </div>
 
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <!-- MTS Shared Database Layer (Supabase) -->
+  <script src="../supabase-db.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

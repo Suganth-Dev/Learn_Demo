@@ -2417,12 +2417,8 @@ i[data-lucide] {
                   </select>
                 </div>
                 <div class="form-group">
-                  <label class="form-label" for="submit-hw-file">Upload Attachment (Simulate filename)</label>
-                  <select class="form-input" id="submit-hw-file">
-                    <option value="anika_alphabets_june.jpg">anika_alphabets_june.jpg (Image - 1.2MB)</option>
-                    <option value="rohan_recitation_ch1.mp3">rohan_recitation_ch1.mp3 (Audio - 3.4MB)</option>
-                    <option value="family_tamil_sentences.pdf">family_tamil_sentences.pdf (Document - 800KB)</option>
-                  </select>
+                  <label class="form-label" for="submit-hw-file">Upload Attachment (Images/PDFs)</label>
+                  <input type="file" class="form-input" id="submit-hw-file" required>
                 </div>
                 <div class="form-group">
                   <label class="form-label" for="submit-hw-comment">Comments for Teacher</label>
@@ -2903,6 +2899,10 @@ i[data-lucide] {
     </div>
   </div>
 
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <!-- MTS Shared Database Layer (Supabase) -->
+  <script src="../supabase-db.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
