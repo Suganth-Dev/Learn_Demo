@@ -185,6 +185,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (typeof renderTeacherSubmissions === 'function') renderTeacherSubmissions();
         } else if (user.role === 'parent') {
           if (typeof renderParentHomeworkCenter === 'function') renderParentHomeworkCenter();
+        } else if (user.role === 'admin') {
+          if (typeof renderAdminSPA === 'function') renderAdminSPA();
         }
       }
     });
@@ -206,6 +208,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (typeof renderTeacherSubmissions === 'function') renderTeacherSubmissions();
       } else if (user.role === 'parent') {
         if (typeof renderParentHomeworkCenter === 'function') renderParentHomeworkCenter();
+      } else if (user.role === 'admin') {
+        if (typeof renderAdminSPA === 'function') renderAdminSPA();
       }
     }
   }, 5000);
@@ -1727,6 +1731,66 @@ function renderTeacherActiveChat(threadId) {
 // ----------------------------------------------------
 // ADMIN SPA CONTROLLER & PERSISTENT CRUD
 // ----------------------------------------------------
+function calculateClassAttendance(classCode) {
+  const db = getDb();
+  const baseRates = {
+    'Grade 1-A': 94,
+    'Grade 2-A': 95,
+    'Grade 3-A': 90, // base 90, minus 3 per absence report
+    'Grade 4-B': 73
+  };
+  const base = baseRates[classCode] || 90;
+  
+  // Find students in this class
+  const studentsInClass = db.students.filter(s => s.class === classCode || s.section === classCode).map(s => s.name);
+  
+  // Count absences for students in this class
+  const absences = db.absenceReports.filter(r => studentsInClass.includes(r.student)).length;
+  
+  // Calculate rate
+  const rate = Math.max(0, Math.min(100, base - (absences * 3)));
+  return {
+    rate: rate,
+    absences: absences
+  };
+}
+
+function renderAdminAttendanceReports() {
+  const db = getDb();
+  const tbody = document.getElementById('admin-attendance-reports-tbody');
+  if (!tbody) return;
+  
+  tbody.innerHTML = '';
+  const activeClasses = db.classes.filter(c => c.status === 'Active' && c.code !== 'Grade 5-A');
+  
+  const baseUnexcused = {
+    'Grade 1-A': 1,
+    'Grade 2-A': 0,
+    'Grade 3-A': 2,
+    'Grade 4-B': 3
+  };
+
+  activeClasses.forEach(c => {
+    const att = calculateClassAttendance(c.code);
+    const sessionsCount = c.lastAttendance && c.lastAttendance !== '—' && !c.lastAttendance.includes('Not done') ? '12 Sessions' : '11 Sessions';
+    
+    // Calculate unexcused absences dynamically: base + any unexcused from database
+    const studentsInClass = db.students.filter(s => s.class === c.code || s.section === c.code).map(s => s.name);
+    const liveUnexcused = db.absenceReports.filter(r => studentsInClass.includes(r.student) && r.status !== 'Excused').length;
+    const unexcusedCount = (baseUnexcused[c.code] || 0) + liveUnexcused;
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${c.code}</td>
+        <td>${c.teacher || 'Unassigned'}</td>
+        <td>${sessionsCount}</td>
+        <td><strong>${att.rate}%</strong></td>
+        <td>${unexcusedCount} Student${unexcusedCount === 1 ? '' : 's'}</td>
+      </tr>
+    `;
+  });
+}
+
 function renderAdminSPA() {
   renderAdminKPIs();
   renderAdminApprovals();
@@ -1737,21 +1801,38 @@ function renderAdminSPA() {
   renderAdminEventsList();
   renderAdminSessions();
   renderAdminAuditLogs();
+  renderAdminAttendanceReports();
 }
 
 function renderAdminKPIs() {
   const db = getDb();
-  const totalStudents = db.students.length + 63; // seed offset total 68
-  const totalTeachers = db.teachers.length + 16; // seed offset total 22
-  const totalParents = db.parents.length + 104; // seed offset total 112
+  const totalStudents = db.students.length;
+  const totalTeachers = db.teachers.length;
+  const totalParents = db.parents.length;
   
   const stuCount = document.getElementById('kpi-students-count');
   const teaCount = document.getElementById('kpi-teachers-count');
   const parCount = document.getElementById('kpi-parents-count');
+  const attCount = document.getElementById('kpi-attendance-count');
+  const teaSub = document.getElementById('kpi-teachers-sub');
   
   if (stuCount) stuCount.textContent = totalStudents;
   if (teaCount) teaCount.textContent = totalTeachers;
   if (parCount) parCount.textContent = totalParents;
+
+  if (teaSub) {
+    const pendingTch = db.approvals.filter(a => a.category === 'Teacher Reg' && a.status === 'Pending').length;
+    teaSub.textContent = `${pendingTch} pending approval${pendingTch === 1 ? '' : 's'}`;
+  }
+
+  // Calculate Overall Attendance
+  const activeClasses = db.classes.filter(c => c.status === 'Active' && c.code !== 'Grade 5-A');
+  let totalRate = 0;
+  activeClasses.forEach(c => {
+    totalRate += calculateClassAttendance(c.code).rate;
+  });
+  const overallAttendance = Math.round(totalRate / (activeClasses.length || 1));
+  if (attCount) attCount.textContent = `${overallAttendance}%`;
 }
 
 function renderAdminApprovals() {
@@ -1763,7 +1844,7 @@ function renderAdminApprovals() {
   db.approvals.forEach(a => {
     const isPending = a.status === 'Pending';
     tbody.innerHTML += `
-      <tr id="approval-row-${a.id}" style="opacity: ${isPending ? '1' : '0.4'}">
+      <tr id="approval-row-${a.id}">
         <td>${a.id}</td>
         <td><span class="badge ${a.category.includes('Link') ? 'badge-amber' : 'badge-blue'}">${a.category}</span></td>
         <td style="font-weight:700;">${a.user}</td>
@@ -1772,8 +1853,8 @@ function renderAdminApprovals() {
         <td style="text-align:right;">
           ${isPending ? `
             <div style="display:inline-flex; gap:6px;">
-              <button class="btn btn-primary btn-sm" style="background-color:var(--success-green);" onclick="approveLinkageItem(${a.id}, '${a.user}')">Approve</button>
-              <button class="btn btn-secondary btn-sm" onclick="rejectLinkageItem(${a.id})">Reject</button>
+              <button class="btn btn-primary btn-sm" style="background-color:var(--success-green);" onclick="approveLinkageItem('${a.id}', '${a.user}')">Approve</button>
+              <button class="btn btn-secondary btn-sm" onclick="rejectLinkageItem('${a.id}')">Reject</button>
             </div>
           ` : `
             <span class="badge ${a.status === 'Approved' ? 'badge-green' : 'badge-red'}">${a.status}</span>
@@ -1785,15 +1866,59 @@ function renderAdminApprovals() {
 }
 
 window.approveLinkageItem = function(rowId, name) {
+  const modalHtml = `
+  <div class="modal-overlay" id="web-approve-confirm-modal" style="display:flex; z-index:9999; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+    <div class="modal" style="background:#fff; border-radius:12px; max-width:400px; width:90%;">
+      <div class="modal-header" style="padding:16px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-size:18px;">Confirm Approval</h3>
+        <button class="modal-close" style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="document.getElementById('web-approve-confirm-modal').remove()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <p style="margin:0;">Are you sure you want to approve the linkage registration profile for <strong>"${name}"</strong>?</p>
+      </div>
+      <div class="modal-footer" style="padding:16px; border-top:1px solid #eee; display:flex; justify-content:flex-end; gap:8px;">
+        <button class="btn btn-secondary" onclick="document.getElementById('web-approve-confirm-modal').remove()">Cancel</button>
+        <button class="btn btn-primary" style="background-color:var(--success-green);" onclick="executeApproveLinkageItem('${rowId}', '${name}')">Yes, Approve</button>
+      </div>
+    </div>
+  </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+};
+
+window.executeApproveLinkageItem = async function(rowId, name) {
+  const modal = document.getElementById('web-approve-confirm-modal');
+  if (modal) modal.remove();
+
   let db = getDb();
   const item = db.approvals.find(a => String(a.id) === String(rowId));
   if (item) {
     item.status = 'Approved';
-    if (name.includes('Padma Subramaniam') || name.includes('Siddharth Nair')) {
-      const stud = db.students.find(s => s.name === 'Siddharth Nair');
-      if (stud) stud.status = 'Active';
-      sbUpdateStudentStatus('Siddharth Nair', 'Active');
+    
+    // Check if this is a Teacher Registration approval
+    if (item.category && (item.category.includes('Teacher') || item.category === 'Teacher Reg')) {
+      const teacher = db.teachers.find(t => t.name === item.user || t.email === item.user);
+      if (teacher) {
+        teacher.role = 'Teacher';
+        if (typeof sbUpdateTeacher === 'function') {
+          await sbUpdateTeacher(teacher.email, { role: 'Teacher' });
+        }
+      }
+    } 
+    // Check if this is a Student Linkage approval
+    else if (item.category && item.category.includes('Link')) {
+      const match = item.details.match(/Linking (.*?)\s*\(/);
+      const targetName = match ? match[1].trim() : (name.includes('Siddharth') ? 'Siddharth Nair' : 'Arun Govindasamy');
+      
+      const stud = db.students.find(s => s.name === targetName);
+      if (stud) {
+        stud.status = 'Active';
+        if (typeof sbUpdateStudentStatus === 'function') {
+          await sbUpdateStudentStatus(targetName, 'Active');
+        }
+      }
     }
+
     const auditEntry = {
       timestamp: sbTimestamp(),
       user: 'Admin Suresh',
@@ -1804,10 +1929,18 @@ window.approveLinkageItem = function(rowId, name) {
     };
     db.auditLog.unshift(auditEntry);
     saveDb(db);
-    sbUpdateApproval(rowId, 'Approved');
-    sbAddAuditLog(auditEntry);
+    
+    if (typeof sbUpdateApproval === 'function') {
+      await sbUpdateApproval(rowId, 'Approved');
+    }
+    if (typeof sbAddAuditLog === 'function') {
+      sbAddAuditLog(auditEntry);
+    }
+    
     renderAdminSPA();
-    alert(`Linkage registration profile for "${name}" approved successfully.`);
+    if (typeof showToast === 'function') {
+      showToast(`Linkage registration profile for "${name}" approved successfully.`, 'success');
+    }
   }
 };
 
@@ -1820,6 +1953,7 @@ window.rejectLinkageItem = function(rowId) {
       saveDb(db);
       sbUpdateApproval(rowId, 'Rejected');
       renderAdminSPA();
+      showToast('Registration request rejected.', 'warning');
     }
   }
 };
@@ -2090,11 +2224,15 @@ function renderAdminTeachersTable() {
   if (typeof lucide !== 'undefined') lucide.createIcons({ node: tbody });
 }
 
-window.approveTeacherAccount = function(email) {
+window.approveTeacherAccount = async function(email) {
   let db = getDb();
   const teacher = db.teachers.find(t => t.email === email);
   if (teacher) {
     teacher.role = 'Teacher';
+    if (typeof sbUpdateTeacher === 'function') {
+      await sbUpdateTeacher(teacher.email, { role: 'Teacher' });
+    }
+    
     db.auditLog.unshift({
       timestamp: 'Just now',
       user: 'Admin Suresh',
@@ -2769,13 +2907,14 @@ window.renderAdminParentsTable = function() {
   db.parents.forEach(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchVal) || p.email.toLowerCase().includes(searchVal);
     if (matchesSearch) {
+      const childrenDisplay = Array.isArray(p.children) ? p.children.join(', ') : (p.children || '—');
       tbody.innerHTML += `
         <tr>
           <td><div class="user-avatar" style="background-color: var(--accent-cyan); width:32px; height:32px; font-size:12px;">${p.initials}</div></td>
           <td style="font-weight:700;">${p.name}</td>
           <td>${p.email}</td>
           <td>${p.phone || '—'}</td>
-          <td>${(p.children || []).join(', ') || '—'}</td>
+          <td>${childrenDisplay || '—'}</td>
           <td style="text-align:right;">
             <div style="display:inline-flex; gap:8px; justify-content:flex-end;">
               <button class="btn btn-secondary btn-sm" onclick="viewParent('${p.email}')" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center;" title="View"><i data-lucide="eye" style="width:14px; height:14px;"></i></button>

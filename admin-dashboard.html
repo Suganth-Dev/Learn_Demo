@@ -2287,7 +2287,7 @@ i[data-lucide] {
               <div class="kpi-info">
                 <h3>Teachers Directory</h3>
                 <span class="kpi-number" id="kpi-teachers-count">22</span>
-                <span class="kpi-sub">6 pending approvals</span>
+                <span class="kpi-sub" id="kpi-teachers-sub">6 pending approvals</span>
               </div>
               <div class="kpi-icon"><i data-lucide="users"></i></div>
             </div>
@@ -2302,7 +2302,7 @@ i[data-lucide] {
             <div class="kpi-card">
               <div class="kpi-info">
                 <h3>School Attendance</h3>
-                <span class="kpi-number">87%</span>
+                <span class="kpi-number" id="kpi-attendance-count">87%</span>
                 <span class="kpi-sub">Average school wide</span>
               </div>
               <div class="kpi-icon"><i data-lucide="calendar"></i></div>
@@ -2714,11 +2714,8 @@ i[data-lucide] {
                       <th>Unexcused Absences Count</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr><td>Grade 1-A</td><td>Mrs. Meena K.</td><td>12 Sessions</td><td><strong>94%</strong></td><td>1 Student</td></tr>
-                    <tr><td>Grade 2-A</td><td>Mr. Arun P.</td><td>12 Sessions</td><td><strong>95%</strong></td><td>0 Students</td></tr>
-                    <tr><td>Grade 3-A</td><td>Mrs. Lakshmi R.</td><td>12 Sessions</td><td><strong>87%</strong></td><td>2 Students</td></tr>
-                    <tr><td>Grade 4-B</td><td>Mrs. Lakshmi R.</td><td>11 Sessions</td><td><strong>73%</strong></td><td>3 Students</td></tr>
+                  <tbody id="admin-attendance-reports-tbody">
+                    <!-- Populated dynamically in app.js -->
                   </tbody>
                 </table>
               </div>
