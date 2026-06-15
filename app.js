@@ -1867,16 +1867,16 @@ function renderAdminApprovals() {
 
 window.approveLinkageItem = function(rowId, name) {
   const modalHtml = `
-  <div class="modal-overlay" id="web-approve-confirm-modal" style="display:flex; z-index:9999; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
-    <div class="modal" style="background:#fff; border-radius:12px; max-width:400px; width:90%;">
-      <div class="modal-header" style="padding:16px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="margin:0; font-size:18px;">Confirm Approval</h3>
-        <button class="modal-close" style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="document.getElementById('web-approve-confirm-modal').remove()">&times;</button>
+  <div class="modal-overlay open" id="web-approve-confirm-modal" style="display:flex; z-index:9999;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 style="margin:0;">Confirm Approval</h3>
+        <button class="modal-close" onclick="document.getElementById('web-approve-confirm-modal').remove()">&times;</button>
       </div>
-      <div class="modal-body" style="padding:20px;">
+      <div class="modal-body">
         <p style="margin:0;">Are you sure you want to approve the linkage registration profile for <strong>"${name}"</strong>?</p>
       </div>
-      <div class="modal-footer" style="padding:16px; border-top:1px solid #eee; display:flex; justify-content:flex-end; gap:8px;">
+      <div class="modal-footer">
         <button class="btn btn-secondary" onclick="document.getElementById('web-approve-confirm-modal').remove()">Cancel</button>
         <button class="btn btn-primary" style="background-color:var(--success-green);" onclick="executeApproveLinkageItem('${rowId}', '${name}')">Yes, Approve</button>
       </div>
