@@ -158,10 +158,10 @@ i[data-lucide] {
 }
 
 .sidebar-logo {
-  width: 38px;
-  height: 38px;
+  width: 48px;
+  height: 48px;
   background-color: var(--surface);
-  border-radius: 50%;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -170,6 +170,15 @@ i[data-lucide] {
   font-size: 20px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.15);
   position: relative;
+}
+
+
+/* Theme-specific sidebar logo visibility */
+html.dark-mode .sidebar-logo.logo-light {
+  display: none !important;
+}
+html:not(.dark-mode) .sidebar-logo.logo-dark {
+  display: none !important;
 }
 
 .sidebar-logo::after {
@@ -2052,7 +2061,16 @@ i[data-lucide] {
       display: flex;
       gap: 8px;
     }
-    .push-app-logo {
+    
+/* Theme-specific push notification logo visibility */
+html.dark-mode .push-app-logo.logo-light {
+  display: none !important;
+}
+html:not(.dark-mode) .push-app-logo.logo-dark {
+  display: none !important;
+}
+
+.push-app-logo {
       width: 20px;
       height: 20px;
       border-radius: 4px;
@@ -2105,7 +2123,12 @@ i[data-lucide] {
     <aside class="sidebar">
       <div>
         <div class="sidebar-brand">
-          <div class="sidebar-logo">த</div>
+          <div class="sidebar-logo logo-light">
+            <img src="logo-blue.png?v=13" alt="MTS Logo" style="width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box;">
+          </div>
+          <div class="sidebar-logo logo-dark">
+            <img src="logo-silver.png?v=13" alt="MTS Logo" style="width: 100%; height: 100%; object-fit: contain; padding: 4px; box-sizing: border-box;">
+          </div>
           <div class="brand-text">MTS <span>Connect</span></div>
         </div>
         <ul class="sidebar-menu">
@@ -2809,7 +2832,12 @@ i[data-lucide] {
                   <div class="phone-speaker"></div>
                   <div class="phone-screen">
                     <div class="phone-push-notification">
-                      <div class="push-app-logo">த</div>
+                      <div class="push-app-logo logo-light">
+                        <img src="logo-blue1.png?v=13" alt="MTS Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                      </div>
+                      <div class="push-app-logo logo-dark">
+                        <img src="logo-silver1.png?v=13" alt="MTS Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                      </div>
                       <div class="push-content">
                         <span class="push-title" id="p-push-title">MTS Connect (Urgent)</span>
                         <p class="push-desc" id="p-push-body">Annual Day Venue Change: Dear Parents, please note that Annual Day has been moved to Building B...</p>
